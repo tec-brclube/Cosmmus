@@ -53,16 +53,35 @@ Enquanto essa variável não existir, o formulário funciona normalmente mas exi
 
 Se alterar o `Codigo.gs`, use **Implantar → Gerenciar implantações → Editar (lápis) → Versão: Nova versão → Implantar**. A URL continua a mesma.
 
+> ⚠️ O script **precisa** estar na versão que localiza a linha pelo protocolo (`findRowByProtocol`). Uma versão antiga, que apenas adiciona linhas, criaria uma linha nova a cada salvamento automático — dezenas de duplicatas por preenchimento. Sempre publique a nova versão do script **antes** de publicar o site.
+
 ---
 
 ## Como as respostas chegam
 
-O formulário tem **22 seções e 159 perguntas**, que geram **220 colunas** na planilha.
+O formulário tem **22 seções e 159 perguntas**, que geram **223 colunas** na planilha.
+
+### Salvamento contínuo
+
+As respostas **não** esperam o envio final: elas sobem para a planilha enquanto a pessoa preenche.
+
+- A linha é criada no primeiro campo respondido e depois apenas **atualizada** — o `Protocolo` é a chave que identifica a linha.
+- O envio acontece ~2,5 s após a pessoa parar de digitar e também a cada troca de etapa.
+- Se a aba for fechada, um `sendBeacon` tenta salvar o que faltava.
+- Se a pessoa voltar depois no mesmo navegador, retoma o mesmo protocolo e continua atualizando a mesma linha.
+- A coluna `Status` distingue **`Em preenchimento`** de **`Concluído`**.
+
+> Consequência prática: você verá na planilha formulários incompletos, com status `Em preenchimento`. Isso é intencional — é justamente o que evita perder dados de quem abandona no meio. Para trabalhar apenas com os finalizados, filtre `Status = Concluído`.
+
+### Colunas
 
 | Coluna | Conteúdo |
 | --- | --- |
-| `Data/hora` | Momento do envio (horário de Brasília) |
-| `Protocolo` | Código exibido ao cliente, ex.: `COSMMUS-20260729-4F2A` |
+| `Data/hora` | Início do preenchimento (horário de Brasília) — não muda nas atualizações |
+| `Protocolo` | Código exibido ao cliente, ex.: `COSMMUS-20260729-4F2A`. Identifica a linha |
+| `Status` | `Em preenchimento` ou `Concluído` |
+| `Última atualização` | Momento do último salvamento |
+| `Etapa alcançada` | Ex.: `7 de 22` |
 | `1.1 Razão social` … | Uma coluna por pergunta, na ordem do formulário (até `22.6`) |
 
 Regras de gravação:
@@ -77,7 +96,8 @@ Regras de gravação:
 
 - **22 etapas**, com barra de progresso e tempo estimado de 35 a 50 minutos.
 - **Tema claro** (fundo `paper` e texto escuro) para leitura confortável em formulário longo, entre o menu e o rodapé escuros do site.
-- **Rascunho automático** no navegador do cliente (`localStorage`), permitindo fechar e retomar depois.
+- **Salvamento contínuo** na planilha (ver acima) + **rascunho local** (`localStorage`), permitindo fechar e retomar depois no mesmo navegador.
+- **Indicador de salvamento** no pé de cada etapa: `Salvando respostas...`, `Respostas salvas às HH:MM` ou `Sem conexão com a planilha — tentar novamente`.
 - **Campos condicionais**: 1.7 e 1.8 aparecem só se houver mais de uma unidade; 3.5 só se houver terceirizados; 4.9 só se houver dificuldade de retenção; 9.7 só se houver pressão excessiva.
 - **Limite de seleção**: a pergunta 15.1 aceita no máximo 10 opções (as demais são desabilitadas ao atingir o limite).
 - **Obrigatórios**: 1.1, 1.2, 1.3, 1.5, 1.6, 1.9, 2.1, 2.4, 2.5, 22.4 e as duas declarações finais (22.5 e 22.6).

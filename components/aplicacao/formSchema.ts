@@ -1985,12 +1985,29 @@ export const formSections: SectionDef[] = [
 /** Todos os campos, na ordem do formulário. */
 export const allFields: FieldDef[] = formSections.flatMap((s) => s.fields);
 
+/** Situação do preenchimento, registrada na planilha. */
+export type SubmissionStatus = 'Em preenchimento' | 'Concluído';
+
+export interface RowMeta {
+  protocol: string;
+  /** Momento do primeiro salvamento — não muda nos salvamentos seguintes. */
+  createdAt: string;
+  /** Momento do último salvamento. */
+  updatedAt: string;
+  status: SubmissionStatus;
+  /** Etapa em que a pessoa estava, ex.: '7 de 22'. */
+  progress: string;
+}
+
+/** Colunas de controle, sempre no início da planilha. */
+export const META_HEADERS = ['Data/hora', 'Protocolo', 'Status', 'Última atualização', 'Etapa alcançada'];
+
 /**
  * Cabeçalhos das colunas da planilha, na ordem do formulário.
  * Campos compostos (grade e grupo numérico) geram uma coluna por linha.
  */
 export const buildHeaders = (): string[] => {
-  const headers = ['Data/hora', 'Protocolo'];
+  const headers = [...META_HEADERS];
   for (const field of allFields) {
     if (field.type === 'grid' || field.type === 'numberGroup') {
       for (const row of field.rows || []) {
@@ -2007,8 +2024,8 @@ export const buildHeaders = (): string[] => {
 };
 
 /** Converte os valores do formulário em uma linha alinhada a buildHeaders(). */
-export const buildRow = (values: FormValues, protocol: string, timestamp: string): string[] => {
-  const row: string[] = [timestamp, protocol];
+export const buildRow = (values: FormValues, meta: RowMeta): string[] => {
+  const row: string[] = [meta.createdAt, meta.protocol, meta.status, meta.updatedAt, meta.progress];
   for (const field of allFields) {
     const value = values[field.id];
     if (field.type === 'grid' || field.type === 'numberGroup') {

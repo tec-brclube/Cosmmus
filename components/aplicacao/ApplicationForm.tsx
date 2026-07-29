@@ -1,24 +1,46 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertTriangle,
   ArrowLeft,
   ArrowRight,
   CheckCircle2,
+  CloudOff,
   Clock,
   Download,
   Loader2,
   Lock,
+  RefreshCw,
   Send,
   ShieldCheck,
 } from 'lucide-react';
 import { FieldDef, FieldValue, FormValues, formSections } from './formSchema';
 import FormField from './FormFields';
-import { buildTextSummary, generateProtocol, hasEndpoint, submitToSheets } from './submit';
+import {
+  brazilTimestamp,
+  buildTextSummary,
+  generateProtocol,
+  hasEndpoint,
+  saveOnExit,
+  SaveOptions,
+  saveToSheets,
+} from './submit';
 
 const DRAFT_KEY = 'cosmmus:aplicacao:v1';
 
+/** Tempo de inatividade antes de enviar as respostas para a planilha. */
+const AUTOSAVE_DELAY = 2500;
+
 type Stage = 'intro' | 'form' | 'success';
 type SubmitState = 'idle' | 'sending' | 'error';
+/** Situação do salvamento contínuo na planilha. */
+type SyncState = 'idle' | 'saving' | 'saved' | 'offline';
+
+interface Draft {
+  values?: FormValues;
+  stepIndex?: number;
+  protocol?: string;
+  createdAt?: string;
+}
 
 const isEmpty = (value: FieldValue | undefined): boolean => {
   if (value === undefined || value === null) return true;
@@ -26,6 +48,9 @@ const isEmpty = (value: FieldValue | undefined): boolean => {
   if (Array.isArray(value)) return value.length === 0;
   return Object.values(value).every((v) => !v);
 };
+
+/** Há pelo menos uma resposta preenchida? Evita criar linhas vazias na planilha. */
+const hasAnyAnswer = (values: FormValues): boolean => Object.values(values).some((v) => !isEmpty(v));
 
 const ApplicationForm: React.FC = () => {
   const [stage, setStage] = useState<Stage>('intro');
@@ -36,32 +61,150 @@ const ApplicationForm: React.FC = () => {
   const [submitError, setSubmitError] = useState<string>('');
   const [protocol, setProtocol] = useState<string>('');
   const [hasDraft, setHasDraft] = useState(false);
+  const [syncState, setSyncState] = useState<SyncState>('idle');
+  const [lastSavedAt, setLastSavedAt] = useState<string>('');
+
+  /** Protocolo e horário de criação: identificam a linha na planilha. */
+  const identityRef = useRef<{ protocol: string; createdAt: string } | null>(null);
+  /** Valores mais recentes, para uso em listeners e temporizadores. */
+  const latestRef = useRef({ values, stepIndex });
+  latestRef.current = { values, stepIndex };
+  /** Último conteúdo confirmado na planilha, para não reenviar o que não mudou. */
+  const savedSnapshotRef = useRef<string>('');
+  const savingRef = useRef(false);
+  const pendingRef = useRef(false);
 
   // Recupera rascunho salvo localmente
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem(DRAFT_KEY);
       if (!raw) return;
-      const parsed = JSON.parse(raw) as { values?: FormValues; stepIndex?: number };
+      const parsed = JSON.parse(raw) as Draft;
       if (parsed.values && Object.keys(parsed.values).length > 0) {
         setValues(parsed.values);
         setStepIndex(Math.min(parsed.stepIndex ?? 0, formSections.length - 1));
         setHasDraft(true);
+        // Retoma a mesma linha da planilha em vez de criar outra
+        if (parsed.protocol && parsed.createdAt) {
+          identityRef.current = { protocol: parsed.protocol, createdAt: parsed.createdAt };
+          setProtocol(parsed.protocol);
+        }
       }
     } catch {
       // rascunho corrompido: ignora
     }
   }, []);
 
-  // Salva rascunho a cada alteração
+  // Salva rascunho local a cada alteração
   useEffect(() => {
     if (Object.keys(values).length === 0) return;
     try {
-      window.localStorage.setItem(DRAFT_KEY, JSON.stringify({ values, stepIndex }));
+      const draft: Draft = {
+        values,
+        stepIndex,
+        protocol: identityRef.current?.protocol,
+        createdAt: identityRef.current?.createdAt,
+      };
+      window.localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
     } catch {
       // armazenamento indisponível (modo privado): segue sem rascunho
     }
-  }, [values, stepIndex]);
+  }, [values, stepIndex, protocol]);
+
+  /** Cria protocolo e horário na primeira necessidade. */
+  const ensureIdentity = useCallback(() => {
+    if (!identityRef.current) {
+      const identity = { protocol: generateProtocol(), createdAt: brazilTimestamp() };
+      identityRef.current = identity;
+      setProtocol(identity.protocol);
+    }
+    return identityRef.current;
+  }, []);
+
+  const buildOptions = useCallback(
+    (status: SaveOptions['status']): SaveOptions => {
+      const identity = ensureIdentity();
+      return {
+        protocol: identity.protocol,
+        createdAt: identity.createdAt,
+        status,
+        progress: `${latestRef.current.stepIndex + 1} de ${formSections.length}`,
+      };
+    },
+    [ensureIdentity],
+  );
+
+  /**
+   * Envia o estado atual para a planilha.
+   * Envios simultâneos são evitados: se já houver um em andamento, marca que
+   * outro é necessário e o dispara ao final — assim nada se perde.
+   */
+  const performSaveRef = useRef<((status: SaveOptions['status']) => Promise<boolean>) | null>(null);
+
+  const performSave = useCallback(
+    async (status: SaveOptions['status']): Promise<boolean> => {
+      if (!hasEndpoint()) return false;
+
+      const snapshot = JSON.stringify(latestRef.current.values);
+      if (status === 'Em preenchimento' && snapshot === savedSnapshotRef.current) return true;
+
+      if (savingRef.current) {
+        pendingRef.current = true;
+        return true;
+      }
+
+      savingRef.current = true;
+      setSyncState('saving');
+
+      const result = await saveToSheets(latestRef.current.values, buildOptions(status));
+
+      savingRef.current = false;
+
+      if (result.ok) {
+        savedSnapshotRef.current = snapshot;
+        setSyncState('saved');
+        setLastSavedAt(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }));
+      } else {
+        setSyncState('offline');
+      }
+
+      // Houve alterações enquanto salvávamos: envia de novo
+      if (pendingRef.current) {
+        pendingRef.current = false;
+        void performSaveRef.current?.('Em preenchimento');
+      }
+
+      return result.ok;
+    },
+    [buildOptions],
+  );
+  performSaveRef.current = performSave;
+
+  // Salvamento contínuo na planilha após alguns segundos sem digitar
+  useEffect(() => {
+    if (stage !== 'form' || !hasEndpoint() || !hasAnyAnswer(values)) return;
+    const timer = window.setTimeout(() => void performSave('Em preenchimento'), AUTOSAVE_DELAY);
+    return () => window.clearTimeout(timer);
+  }, [values, stepIndex, stage, performSave]);
+
+  // Rede de segurança: se a aba for fechada com alterações pendentes, dispara um beacon
+  useEffect(() => {
+    const handleExit = () => {
+      if (stage !== 'form') return;
+      const snapshot = JSON.stringify(latestRef.current.values);
+      if (snapshot === savedSnapshotRef.current || !hasAnyAnswer(latestRef.current.values)) return;
+      saveOnExit(latestRef.current.values, buildOptions('Em preenchimento'));
+    };
+    window.addEventListener('pagehide', handleExit);
+    return () => window.removeEventListener('pagehide', handleExit);
+  }, [stage, buildOptions]);
+
+  /** Aguarda o fim de um salvamento em andamento (no máximo ~5s). */
+  const waitForIdle = async () => {
+    for (let i = 0; i < 20 && savingRef.current; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+  };
 
   const section = formSections[stepIndex];
 
@@ -145,6 +288,8 @@ const ApplicationForm: React.FC = () => {
   const goToStep = (index: number) => {
     setStepIndex(index);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Ao trocar de etapa, sobe as respostas na hora em vez de esperar o debounce
+    if (hasAnyAnswer(latestRef.current.values)) void performSave('Em preenchimento');
   };
 
   const handleNext = () => {
@@ -159,12 +304,21 @@ const ApplicationForm: React.FC = () => {
   const handleSubmit = async () => {
     if (!validateStep()) return;
 
-    const currentProtocol = protocol || generateProtocol();
-    setProtocol(currentProtocol);
     setSubmitState('sending');
     setSubmitError('');
 
-    const result = await submitToSheets(values, currentProtocol);
+    // Espera um salvamento automático em andamento para não sobrescrever o status final
+    await waitForIdle();
+
+    const ok = await performSave('Concluído');
+    const result: { ok: boolean; error?: string } = ok
+      ? { ok: true }
+      : {
+          ok: false,
+          error: hasEndpoint()
+            ? 'Não houve resposta do servidor. Verifique sua conexão com a internet e tente novamente.'
+            : 'Endpoint de envio não configurado (VITE_SHEETS_ENDPOINT).',
+        };
 
     if (result.ok) {
       try {
@@ -261,7 +415,8 @@ const ApplicationForm: React.FC = () => {
                 <p className="text-sm text-paper-soft font-light leading-relaxed">
                   São 22 etapas. Tempo estimado de preenchimento:{' '}
                   <strong className="text-paper-ink font-semibold">35 a 50 minutos</strong>. Você pode parar e
-                  continuar depois: as respostas são salvas automaticamente neste navegador.
+                  continuar depois: cada resposta é <strong className="text-paper-ink font-semibold">salva
+                  automaticamente</strong> enquanto você preenche, sem precisar concluir de uma vez.
                 </p>
               </div>
             </div>
@@ -286,6 +441,12 @@ const ApplicationForm: React.FC = () => {
                     setValues({});
                     setStepIndex(0);
                     setHasDraft(false);
+                    // Um novo preenchimento gera outra linha na planilha
+                    identityRef.current = null;
+                    setProtocol('');
+                    savedSnapshotRef.current = '';
+                    setSyncState('idle');
+                    setLastSavedAt('');
                   }}
                   className="py-5 px-8 rounded-full border border-paper-line text-paper-soft font-semibold hover:border-paper-accent hover:text-paper-accent transition-colors"
                 >
@@ -475,8 +636,32 @@ const ApplicationForm: React.FC = () => {
               <ArrowLeft size={18} /> Anterior
             </button>
 
-            <div className="flex items-center gap-2 text-xs text-paper-muted order-first sm:order-none">
-              <ShieldCheck size={14} /> Rascunho salvo automaticamente
+            <div className="order-first sm:order-none flex items-center justify-center">
+              {syncState === 'saving' && (
+                <span className="flex items-center gap-2 text-xs text-paper-muted">
+                  <RefreshCw size={14} className="animate-spin" /> Salvando respostas...
+                </span>
+              )}
+              {syncState === 'saved' && (
+                <span className="flex items-center gap-2 text-xs text-paper-muted">
+                  <ShieldCheck size={14} className="text-paper-accent" /> Respostas salvas
+                  {lastSavedAt && ` às ${lastSavedAt}`}
+                </span>
+              )}
+              {syncState === 'offline' && (
+                <button
+                  type="button"
+                  onClick={() => void performSave('Em preenchimento')}
+                  className="flex items-center gap-2 text-xs font-semibold text-paper-danger hover:underline"
+                >
+                  <CloudOff size={14} /> Sem conexão com a planilha — tentar novamente
+                </button>
+              )}
+              {syncState === 'idle' && (
+                <span className="flex items-center gap-2 text-xs text-paper-muted">
+                  <ShieldCheck size={14} /> Salvamento automático ativo
+                </span>
+              )}
             </div>
 
             {isLastStep ? (
