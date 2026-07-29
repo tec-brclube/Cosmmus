@@ -18,6 +18,9 @@ const navItems: NavItem[] = [
   { label: 'Contato', value: 'contact' },
 ];
 
+/** CTA destacado: leva ao formulário de caracterização organizacional (/aplicacaocosmmus). */
+const ctaItem: NavItem = { label: 'Aplique-se', value: 'aplicacao' };
+
 const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -46,8 +49,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
           </div>
 
           {/* Desktop Menu */}
-          <div className="hidden lg:block">
-            <div className="ml-10 flex items-baseline space-x-2">
+          <div className="hidden xl:block">
+            <div className="ml-10 flex items-center space-x-2">
               {navItems.map((item) => (
                 <button
                   key={item.value}
@@ -61,11 +64,23 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
                   {item.label}
                 </button>
               ))}
+
+              <button
+                onClick={() => handleNav(ctaItem.value)}
+                title="Formulário de caracterização organizacional"
+                className={`ml-2 px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 border ${
+                  currentView === ctaItem.value
+                    ? 'gradient-btn text-white border-transparent shadow-[0_0_24px_rgba(217,0,255,0.4)]'
+                    : 'border-brand-pink/60 text-white hover:bg-brand-pink hover:border-brand-pink'
+                }`}
+              >
+                {ctaItem.label}
+              </button>
             </div>
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="-mr-2 flex lg:hidden">
+          <div className="-mr-2 flex xl:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-white/70 hover:text-white hover:bg-gray-700 focus:outline-none"
@@ -78,8 +93,18 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
 
       {/* Mobile Menu Panel */}
       {isOpen && (
-        <div className="lg:hidden bg-brand-navy border-t border-white/10">
+        <div className="xl:hidden bg-brand-navy border-t border-white/10">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            <button
+              onClick={() => handleNav(ctaItem.value)}
+              className={`block w-full text-left px-3 py-4 mb-2 rounded-xl text-base font-bold border transition-all duration-300 ${
+                currentView === ctaItem.value
+                  ? 'gradient-btn text-white border-transparent'
+                  : 'border-brand-pink/60 text-white hover:bg-brand-pink'
+              }`}
+            >
+              Aplique-se para consultoria
+            </button>
             {navItems.map((item) => (
               <button
                 key={item.value}

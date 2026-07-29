@@ -17,6 +17,17 @@
                 purple: '#8b00ff',
                 pink: '#d900ff',
                 cyan: '#00ffff',
+              },
+              // Tema claro usado em documentos longos (formulário /aplicacaocosmmus)
+              paper: {
+                bg: '#f4f1fa',      // fundo lavanda claríssimo
+                card: '#ffffff',
+                line: '#e3ddf1',    // bordas e divisores
+                ink: '#170c2e',     // texto principal
+                soft: '#544c6b',    // texto secundário
+                muted: '#8b84a3',   // apoio e placeholders
+                accent: '#7a00e0',  // roxo com contraste em fundo claro
+                danger: '#c2007a',  // magenta de alerta legível
               }
             },
             fontFamily: {
@@ -53,6 +64,13 @@
         -webkit-text-fill-color: transparent;
         background-size: 200% auto;
         animation: shine 5s linear infinite;
+      }
+      /* Versão do texto em gradiente legível sobre fundos claros */
+      .gradient-text-ink {
+        background: linear-gradient(to right, #7a00e0, #d900ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
       }
       .gradient-btn {
         background: linear-gradient(to right, #d900ff, #00ffff, #d900ff);

@@ -1,3 +1,14 @@
+/// <reference types="vite/client" />
+
+interface ImportMetaEnv {
+  /** URL do aplicativo da web do Google Apps Script que grava na planilha. */
+  readonly VITE_SHEETS_ENDPOINT?: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+
 declare module "*.webp" {
   const value: string;
   export default value;

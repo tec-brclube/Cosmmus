@@ -17,9 +17,21 @@ import { ContentProvider } from './context/ContentContext';
 import SpaceBackground from './components/SpaceBackground';
 import WhatsAppButton from './components/WhatsAppButton';
 import CtaSection from './components/CtaSection';
+import ApplicationForm from './components/aplicacao/ApplicationForm';
+
+/** Views com URL própria (as demais são navegadas por estado, na raiz). */
+const ROUTES: Partial<Record<ViewState, string>> = {
+  aplicacao: '/aplicacaocosmmus',
+};
+
+const viewFromPath = (pathname: string): ViewState | null => {
+  const normalized = pathname.replace(/\/+$/, '').toLowerCase() || '/';
+  const entry = Object.entries(ROUTES).find(([, path]) => path === normalized);
+  return entry ? (entry[0] as ViewState) : null;
+};
 
 const AppContent: React.FC = () => {
-  const [currentView, setCurrentView] = useState<ViewState>('home');
+  const [currentView, setCurrentView] = useState<ViewState>(() => viewFromPath(window.location.pathname) || 'home');
   const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
   const [currentCaseId, setCurrentCaseId] = useState<string | null>(null);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
@@ -28,6 +40,21 @@ const AppContent: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [currentView]);
+
+  // Mantém a URL sincronizada com as views que possuem endereço próprio
+  useEffect(() => {
+    const desired = ROUTES[currentView] || '/';
+    if (window.location.pathname.replace(/\/+$/, '') !== desired.replace(/\/+$/, '')) {
+      window.history.pushState({}, '', desired);
+    }
+  }, [currentView]);
+
+  // Botões voltar/avançar do navegador
+  useEffect(() => {
+    const handlePopState = () => setCurrentView(viewFromPath(window.location.pathname) || 'home');
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   const handleViewService = (serviceId: string) => {
     setCurrentServiceId(serviceId);
@@ -68,6 +95,8 @@ const AppContent: React.FC = () => {
         return <Blog />;
       case 'contact':
         return <Contact />;
+      case 'aplicacao':
+        return <ApplicationForm />;
       default:
         return <Hero onCtaClick={() => setCurrentView('contact')} />;
     }

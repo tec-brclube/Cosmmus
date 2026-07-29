@@ -1,0 +1,2032 @@
+/**
+ * Schema do FORMULÁRIO DE CARACTERIZAÇÃO ORGANIZACIONAL
+ * Gestão de Riscos Psicossociais e Saúde no Trabalho
+ *
+ * Este arquivo é a fonte única de verdade: define os campos exibidos na tela
+ * e também os nomes das colunas enviadas para a planilha do Google Sheets.
+ */
+
+export type FieldType =
+  | 'text'
+  | 'paragraph'
+  | 'number'
+  | 'email'
+  | 'tel'
+  | 'cnpj'
+  | 'select'
+  | 'radio'
+  | 'checkbox'
+  | 'scale'
+  | 'grid'
+  | 'numberGroup'
+  | 'consent';
+
+export type FieldValue = string | string[] | Record<string, string>;
+export type FormValues = Record<string, FieldValue>;
+
+export interface FieldDef {
+  /** Numeração oficial do formulário, ex.: '1.1'. Também é a chave do valor. */
+  id: string;
+  label: string;
+  type: FieldType;
+  required?: boolean;
+  /** Texto de orientação exibido abaixo do enunciado. */
+  help?: string;
+  placeholder?: string;
+  options?: string[];
+  /** Exibe campo de texto livre quando a opção "Outro/Outra/Outros" é marcada. */
+  allowOther?: boolean;
+  /** Linhas de uma grade ou de um grupo numérico. */
+  rows?: string[];
+  /** Colunas de uma grade de múltipla escolha. */
+  columns?: string[];
+  /** Título da primeira coluna de uma grade. */
+  rowHeader?: string;
+  /** Limite de opções marcáveis em caixas de seleção. */
+  maxSelections?: number;
+  scaleMin?: number;
+  scaleMax?: number;
+  scaleMinLabel?: string;
+  scaleMaxLabel?: string;
+  /** Exibição condicional. */
+  showIf?: (values: FormValues) => boolean;
+}
+
+export interface SectionDef {
+  /** Numeração oficial, ex.: '1'. */
+  number: string;
+  title: string;
+  /** Texto introdutório da etapa. */
+  intro?: string;
+  fields: FieldDef[];
+}
+
+export const OTHER_SUFFIX = '__outro';
+
+/** Rótulos padronizados reutilizados em várias perguntas. */
+const SIM_NAO = ['Sim', 'Não'];
+const SIM_NAO_NAO_SEI = ['Sim', 'Não', 'Não sei'];
+const DOC_STATUS = ['Sim, atualizado', 'Sim, mas precisa ser revisado', 'Está em elaboração', 'Não', 'Não sei'];
+
+/** Valor de texto normalizado (para uso nas condições de exibição). */
+const str = (v: FieldValue | undefined): string => (typeof v === 'string' ? v : '');
+
+export const formSections: SectionDef[] = [
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '1',
+    title: 'Identificação da organização',
+    intro: 'Dados cadastrais e de estrutura da empresa.',
+    fields: [
+      { id: '1.1', label: 'Razão social', type: 'text', required: true },
+      { id: '1.2', label: 'Nome fantasia', type: 'text', required: true },
+      { id: '1.3', label: 'CNPJ', type: 'cnpj', required: true, placeholder: '00.000.000/0000-00' },
+      { id: '1.4', label: 'Ano de fundação da organização', type: 'number', placeholder: 'Ex.: 2014' },
+      { id: '1.5', label: 'Município e estado da sede', type: 'text', required: true, placeholder: 'Ex.: Goiânia - GO' },
+      {
+        id: '1.6',
+        label: 'A organização possui outras unidades, filiais, estabelecimentos ou frentes de trabalho?',
+        type: 'radio',
+        required: true,
+        options: [
+          'Não',
+          'Sim, no mesmo município',
+          'Sim, em outros municípios do mesmo estado',
+          'Sim, em outros estados',
+          'Sim, inclusive fora do Brasil',
+        ],
+      },
+      {
+        id: '1.7',
+        label: 'Quantas unidades ou estabelecimentos estão em funcionamento?',
+        type: 'number',
+        showIf: (v) => str(v['1.6']).startsWith('Sim'),
+      },
+      {
+        id: '1.8',
+        label: 'Em quais municípios e estados essas unidades estão localizadas?',
+        type: 'paragraph',
+        showIf: (v) => str(v['1.6']).startsWith('Sim'),
+      },
+      {
+        id: '1.9',
+        label: 'Segmento principal de atuação',
+        type: 'select',
+        required: true,
+        allowOther: true,
+        options: [
+          'Comércio',
+          'Serviços',
+          'Indústria',
+          'Construção civil',
+          'Transporte e logística',
+          'Saúde',
+          'Educação',
+          'Tecnologia',
+          'Agronegócio',
+          'Alimentação',
+          'Hotelaria e turismo',
+          'Serviços financeiros',
+          'Administração pública',
+          'Organização social ou terceiro setor',
+          'Prestação de serviços terceirizados',
+          'Outro',
+        ],
+      },
+      { id: '1.10', label: 'CNAE principal', type: 'text', placeholder: 'Ex.: 47.11-3-02' },
+      {
+        id: '1.11',
+        label: 'Descreva resumidamente os principais produtos, serviços ou atividades da organização',
+        type: 'paragraph',
+        help: 'Explique o que a empresa entrega, para quem entrega e como suas operações funcionam.',
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '2',
+    title: 'Responsável pelo preenchimento',
+    intro: 'Precisamos saber com quem falar para dar continuidade à proposta.',
+    fields: [
+      { id: '2.1', label: 'Nome completo', type: 'text', required: true },
+      { id: '2.2', label: 'Cargo ou função', type: 'text' },
+      { id: '2.3', label: 'Área ou departamento', type: 'text' },
+      { id: '2.4', label: 'E-mail profissional', type: 'email', required: true, placeholder: 'nome@empresa.com.br' },
+      { id: '2.5', label: 'Telefone ou WhatsApp', type: 'tel', required: true, placeholder: '(00) 00000-0000' },
+      {
+        id: '2.6',
+        label: 'Qual é sua participação nas decisões relacionadas a este projeto?',
+        type: 'radio',
+        allowOther: true,
+        options: [
+          'Sou o decisor final',
+          'Participo da decisão',
+          'Sou responsável pelo levantamento das informações',
+          'Estou pesquisando fornecedores',
+          'Preciso apresentar a proposta a outros gestores',
+          'Outro',
+        ],
+      },
+      {
+        id: '2.7',
+        label: 'Quem será o principal responsável interno pelo acompanhamento do projeto?',
+        type: 'radio',
+        allowOther: true,
+        options: [
+          'Proprietário, sócio ou presidente',
+          'Diretoria',
+          'Recursos Humanos ou Gestão de Pessoas',
+          'Segurança e Saúde no Trabalho',
+          'Departamento Pessoal',
+          'Jurídico ou Compliance',
+          'Administração',
+          'Comitê multidisciplinar',
+          'Ainda não foi definido',
+          'Outro',
+        ],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '3',
+    title: 'Dimensão da organização e do público avaliado',
+    intro: 'Estes números definem diretamente o tamanho do trabalho e o número de grupos a serem avaliados.',
+    fields: [
+      {
+        id: '3.1',
+        label: 'Quantas pessoas trabalham atualmente na organização?',
+        type: 'numberGroup',
+        help: 'Informe as quantidades aproximadas. Deixe em branco o que não se aplica.',
+        rows: [
+          'Empregados contratados pelo regime CLT',
+          'Estagiários',
+          'Jovens aprendizes',
+          'Trabalhadores temporários',
+          'Trabalhadores terceirizados',
+          'Prestadores de serviços recorrentes',
+          'Sócios que atuam na operação',
+          'Outros',
+        ],
+      },
+      {
+        id: '3.2',
+        label: 'Número total aproximado de pessoas que deverão participar da avaliação',
+        type: 'number',
+      },
+      {
+        id: '3.3',
+        label: 'Existem trabalhadores afastados atualmente?',
+        type: 'radio',
+        options: [
+          'Não',
+          'Sim, por motivos de saúde física',
+          'Sim, por motivos relacionados à saúde mental',
+          'Sim, por acidente ou doença do trabalho',
+          'Sim, por diferentes motivos',
+          'Não temos essa informação consolidada',
+          'Prefiro informar posteriormente',
+        ],
+      },
+      {
+        id: '3.4',
+        label: 'A empresa utiliza mão de obra terceirizada em suas instalações ou operações?',
+        type: 'radio',
+        options: SIM_NAO,
+      },
+      {
+        id: '3.5',
+        label: 'Informe aproximadamente quantos trabalhadores terceirizados e em quais atividades',
+        type: 'paragraph',
+        showIf: (v) => str(v['3.4']) === 'Sim',
+      },
+      {
+        id: '3.6',
+        label: 'Há trabalhadores que atuam permanentemente nas instalações de clientes ou parceiros?',
+        type: 'radio',
+        options: SIM_NAO,
+      },
+      {
+        id: '3.7',
+        label: 'A organização pretende incluir quais públicos no projeto?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Todos os empregados',
+          'Apenas determinados setores',
+          'Lideranças e gestores',
+          'Trabalhadores operacionais',
+          'Trabalhadores administrativos',
+          'Terceirizados',
+          'Estagiários e aprendizes',
+          'Sócios que atuam na operação',
+          'Ainda não sabemos',
+          'Outro',
+        ],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '4',
+    title: 'Estrutura organizacional',
+    fields: [
+      { id: '4.1', label: 'Quantos departamentos, setores ou áreas formais existem?', type: 'number' },
+      {
+        id: '4.2',
+        label: 'Relacione os departamentos, setores ou áreas existentes',
+        type: 'paragraph',
+        help: 'Exemplo: Administrativo, Comercial, Financeiro, Operações, Produção, Atendimento, Logística e Recursos Humanos.',
+      },
+      {
+        id: '4.3',
+        label: 'Existem organograma e descrição formal dos cargos?',
+        type: 'grid',
+        rowHeader: 'Documento ou prática',
+        rows: [
+          'Organograma',
+          'Descrição de cargos',
+          'Manual de funções',
+          'Fluxos de processos',
+          'Políticas internas',
+          'Código de conduta',
+          'Plano de cargos e salários',
+        ],
+        columns: ['Sim, atualizado', 'Sim, desatualizado', 'Em elaboração', 'Não existe', 'Não sei'],
+      },
+      { id: '4.4', label: 'Quantas pessoas exercem funções formais de liderança?', type: 'number' },
+      {
+        id: '4.5',
+        label: 'Qual é a média aproximada de trabalhadores por líder imediato?',
+        type: 'radio',
+        options: ['Até 5', 'De 6 a 10', 'De 11 a 20', 'De 21 a 30', 'Mais de 30', 'Varia muito entre os setores', 'Não sabemos'],
+      },
+      {
+        id: '4.6',
+        label: 'Existem níveis diferentes de liderança?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Encarregados ou líderes de equipe',
+          'Supervisores',
+          'Coordenadores',
+          'Gerentes',
+          'Diretores',
+          'Sócios ou proprietários',
+          'Não há estrutura formal de liderança',
+          'Outro',
+        ],
+      },
+      {
+        id: '4.7',
+        label: 'Existem funções exercidas por apenas uma pessoa, sem possibilidade imediata de substituição?',
+        type: 'radio',
+        options: SIM_NAO_NAO_SEI,
+      },
+      {
+        id: '4.8',
+        label: 'Existem departamentos ou funções com dificuldade frequente de recrutamento ou retenção?',
+        type: 'radio',
+        options: SIM_NAO,
+      },
+      {
+        id: '4.9',
+        label: 'Em caso positivo, quais?',
+        type: 'paragraph',
+        showIf: (v) => str(v['4.8']) === 'Sim',
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '5',
+    title: 'Características do trabalho',
+    fields: [
+      {
+        id: '5.1',
+        label: 'As atividades da organização são predominantemente:',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Administrativas',
+          'Comerciais',
+          'Atendimento ao público',
+          'Atendimento remoto ou por telefone',
+          'Produção industrial',
+          'Operacionais',
+          'Braçais',
+          'Técnicas',
+          'Intelectuais ou criativas',
+          'Assistenciais ou de cuidado',
+          'Transporte ou condução',
+          'Logística',
+          'Trabalho em altura',
+          'Trabalho externo',
+          'Trabalho em campo',
+          'Segurança ou vigilância',
+          'Trabalho com máquinas',
+          'Trabalho com riscos físicos, químicos ou biológicos',
+          'Outro',
+        ],
+      },
+      {
+        id: '5.2',
+        label: 'O trabalho envolve contato frequente com:',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Clientes ou consumidores',
+          'Pacientes',
+          'Alunos',
+          'Usuários de serviços públicos',
+          'Pessoas em sofrimento ou situação de vulnerabilidade',
+          'Pessoas insatisfeitas ou agressivas',
+          'Fornecedores',
+          'Autoridades ou órgãos fiscalizadores',
+          'Crianças ou adolescentes',
+          'Pessoas idosas',
+          'Pessoas privadas de liberdade',
+          'Não há contato relevante com público externo',
+          'Outro',
+        ],
+      },
+      {
+        id: '5.3',
+        label: 'As atividades envolvem algum dos fatores abaixo?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Decisões de grande responsabilidade',
+          'Responsabilidade sobre vidas ou segurança de terceiros',
+          'Responsabilidade financeira elevada',
+          'Manuseio de valores',
+          'Controle rigoroso de qualidade',
+          'Elevado risco de erro operacional',
+          'Atendimento de urgências ou emergências',
+          'Trabalho sob pressão de tempo',
+          'Metas comerciais',
+          'Metas de produção',
+          'Metas de atendimento',
+          'Prazos curtos ou imprevisíveis',
+          'Fiscalização ou monitoramento constante',
+          'Trabalho repetitivo',
+          'Trabalho emocionalmente exigente',
+          'Contato com sofrimento, acidentes ou violência',
+          'Necessidade de disponibilidade fora do expediente',
+          'Nenhuma das anteriores',
+          'Outro',
+        ],
+      },
+      {
+        id: '5.4',
+        label: 'Quais consequências podem decorrer de um erro cometido durante o trabalho?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Retrabalho',
+          'Reclamação de cliente',
+          'Perda financeira',
+          'Perda de contrato',
+          'Aplicação de penalidade',
+          'Acidente de trabalho',
+          'Risco à saúde ou à vida',
+          'Danos a equipamentos ou patrimônio',
+          'Exposição pública ou reputacional',
+          'Responsabilização jurídica',
+          'Advertência ou sanção ao trabalhador',
+          'Outra',
+        ],
+      },
+      {
+        id: '5.5',
+        label: 'Qual é o nível de autonomia dos trabalhadores para organizar suas próprias atividades?',
+        type: 'scale',
+        scaleMinLabel: 'Muito baixo',
+        scaleMaxLabel: 'Muito alto',
+      },
+      {
+        id: '5.6',
+        label: 'Os trabalhadores podem fazer pausas quando necessário?',
+        type: 'radio',
+        options: [
+          'Sim, com autonomia',
+          'Sim, mas mediante autorização',
+          'Apenas nos horários determinados',
+          'Em alguns setores',
+          'Raramente',
+          'Não',
+          'Não sei',
+        ],
+      },
+      {
+        id: '5.7',
+        label: 'O ritmo de trabalho é determinado principalmente por:',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Demanda de clientes',
+          'Metas',
+          'Máquinas ou linha de produção',
+          'Sistemas e plataformas digitais',
+          'Prazos',
+          'Volume de tarefas',
+          'Liderança imediata',
+          'Ocorrências e emergências',
+          'Sazonalidade',
+          'O próprio trabalhador',
+          'Outro',
+        ],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '6',
+    title: 'Jornadas, escalas e modalidades de trabalho',
+    fields: [
+      {
+        id: '6.1',
+        label: 'Quais jornadas ou modalidades são utilizadas?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Jornada administrativa',
+          'Turno matutino',
+          'Turno vespertino',
+          'Turno noturno',
+          'Turnos alternados',
+          'Escala 12×36',
+          'Escala 6×1',
+          'Escala 5×2',
+          'Plantões',
+          'Sobreaviso',
+          'Banco de horas',
+          'Horários flexíveis',
+          'Jornada externa',
+          'Trabalho remoto',
+          'Trabalho híbrido',
+          'Outra',
+        ],
+      },
+      {
+        id: '6.2',
+        label: 'Qual é a carga horária semanal predominante?',
+        type: 'radio',
+        options: [
+          'Até 20 horas',
+          'De 21 a 30 horas',
+          'De 31 a 36 horas',
+          'De 37 a 40 horas',
+          'De 41 a 44 horas',
+          'Acima de 44 horas',
+          'Varia conforme o cargo',
+          'Não sei',
+        ],
+      },
+      {
+        id: '6.3',
+        label: 'Existe realização habitual de horas extras?',
+        type: 'radio',
+        options: [
+          'Não',
+          'Ocasionalmente',
+          'Frequentemente',
+          'Diariamente em alguns setores',
+          'Há períodos sazonais de muitas horas extras',
+          'Não temos controle consolidado',
+        ],
+      },
+      {
+        id: '6.4',
+        label: 'Há trabalho aos finais de semana ou feriados?',
+        type: 'radio',
+        options: ['Não', 'Ocasionalmente', 'Sim, por escala', 'Sim, de forma frequente', 'Apenas para algumas funções'],
+      },
+      {
+        id: '6.5',
+        label: 'Os trabalhadores são acionados fora do horário de trabalho?',
+        type: 'radio',
+        options: [
+          'Nunca',
+          'Raramente',
+          'Algumas vezes por mês',
+          'Algumas vezes por semana',
+          'Diariamente',
+          'Apenas gestores',
+          'Apenas algumas funções',
+          'Não sei',
+        ],
+      },
+      {
+        id: '6.6',
+        label: 'Há dificuldade para que os trabalhadores usufruam férias, folgas ou intervalos?',
+        type: 'scale',
+        scaleMinLabel: 'Nenhuma dificuldade',
+        scaleMaxLabel: 'Dificuldade muito elevada',
+      },
+      {
+        id: '6.7',
+        label: 'Há mudanças frequentes ou imprevisíveis nas escalas?',
+        type: 'radio',
+        options: ['Sim', 'Não', 'Em alguns setores'],
+      },
+      {
+        id: '6.8',
+        label: 'A empresa possui mecanismos de controle de jornada?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Ponto eletrônico',
+          'Ponto manual',
+          'Sistema ou aplicativo',
+          'Registro por acesso',
+          'Não há controle para determinados cargos',
+          'Não há controle formal',
+          'Outro',
+        ],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '7',
+    title: 'Remuneração, benefícios e percepção de valorização',
+    intro:
+      'Nesta etapa inicial trabalhamos com faixas, e não com salários individualizados. Não informe nomes de trabalhadores.',
+    fields: [
+      {
+        id: '7.1',
+        label: 'A empresa possui estrutura formal de cargos e salários?',
+        type: 'radio',
+        options: ['Sim, atualizada', 'Sim, mas precisa ser revisada', 'Está em implantação', 'Não', 'Não sei'],
+      },
+      {
+        id: '7.2',
+        label: 'Como a empresa avalia sua remuneração em comparação com o mercado?',
+        type: 'radio',
+        options: [
+          'Acima da média',
+          'Próxima à média',
+          'Abaixo da média',
+          'Varia conforme o cargo',
+          'Nunca realizamos pesquisa salarial',
+          'Não sabemos',
+        ],
+      },
+      {
+        id: '7.3',
+        label: 'Informe a faixa salarial bruta predominante na organização',
+        type: 'radio',
+        options: [
+          'Até R$ 2.000',
+          'De R$ 2.001 a R$ 3.000',
+          'De R$ 3.001 a R$ 5.000',
+          'De R$ 5.001 a R$ 8.000',
+          'De R$ 8.001 a R$ 12.000',
+          'Acima de R$ 12.000',
+          'Há grande variação entre os cargos',
+          'Prefiro informar em reunião',
+        ],
+      },
+      {
+        id: '7.4',
+        label: 'Caso considere relevante, informe as faixas salariais aproximadas por grupo de cargos',
+        type: 'paragraph',
+      },
+      {
+        id: '7.5',
+        label: 'Quais benefícios são oferecidos?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Vale-transporte',
+          'Vale-alimentação ou refeição',
+          'Plano de saúde',
+          'Plano odontológico',
+          'Seguro de vida',
+          'Participação nos resultados',
+          'Premiações ou bonificações',
+          'Comissão',
+          'Auxílio-creche',
+          'Auxílio-educação',
+          'Apoio psicológico',
+          'Programas de saúde e bem-estar',
+          'Convênios',
+          'Folga de aniversário',
+          'Trabalho flexível',
+          'Outros',
+        ],
+      },
+      {
+        id: '7.6',
+        label: 'Existem reclamações relacionadas a salário, benefícios ou critérios de reconhecimento?',
+        type: 'radio',
+        options: [
+          'Não temos conhecimento',
+          'Há reclamações pontuais',
+          'Há reclamações frequentes',
+          'É um dos principais problemas atuais',
+          'Não possuímos canais para identificar isso',
+        ],
+      },
+      {
+        id: '7.7',
+        label: 'Os critérios para promoções, bonificações e reconhecimento são claros?',
+        type: 'scale',
+        scaleMinLabel: 'Nada claros',
+        scaleMaxLabel: 'Muito claros',
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '8',
+    title: 'Gestão, liderança e comunicação',
+    fields: [
+      {
+        id: '8.1',
+        label: 'Como você avalia a qualidade geral da liderança na organização?',
+        type: 'scale',
+        scaleMinLabel: 'Muito insatisfatória',
+        scaleMaxLabel: 'Muito satisfatória',
+      },
+      {
+        id: '8.2',
+        label: 'Os líderes recebem formação para gestão de pessoas?',
+        type: 'radio',
+        options: [
+          'Sim, regularmente',
+          'Sim, ocasionalmente',
+          'Apenas no momento da promoção',
+          'Alguns líderes recebem',
+          'Não',
+          'Está sendo planejado',
+        ],
+      },
+      {
+        id: '8.3',
+        label: 'Existem reuniões periódicas entre líderes e equipes?',
+        type: 'radio',
+        options: [
+          'Semanais',
+          'Quinzenais',
+          'Mensais',
+          'Esporádicas',
+          'Apenas quando há problemas',
+          'Não existem',
+          'Varia entre os setores',
+        ],
+      },
+      {
+        id: '8.4',
+        label: 'Os trabalhadores recebem orientações claras sobre suas responsabilidades?',
+        type: 'scale',
+        scaleMinLabel: 'Raramente',
+        scaleMaxLabel: 'Sempre',
+      },
+      {
+        id: '8.5',
+        label: 'Há mudanças frequentes de prioridade sem comunicação ou planejamento adequado?',
+        type: 'scale',
+        scaleMinLabel: 'Nunca',
+        scaleMaxLabel: 'Muito frequentemente',
+      },
+      {
+        id: '8.6',
+        label: 'Como as informações importantes são comunicadas?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Reuniões',
+          'E-mail',
+          'WhatsApp',
+          'Sistema interno',
+          'Murais',
+          'Comunicados formais',
+          'Comunicação verbal pelos gestores',
+          'Não há padrão definido',
+          'Outro',
+        ],
+      },
+      {
+        id: '8.7',
+        label: 'Existem conflitos frequentes entre:',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Trabalhadores da mesma equipe',
+          'Diferentes departamentos',
+          'Trabalhadores e lideranças',
+          'Lideranças e diretoria',
+          'Empresa e clientes',
+          'Empresa e fornecedores',
+          'Empregados próprios e terceirizados',
+          'Não temos conhecimento de conflitos frequentes',
+          'Outro',
+        ],
+      },
+      {
+        id: '8.8',
+        label: 'Os trabalhadores se sentem seguros para discordar, fazer perguntas ou comunicar erros?',
+        type: 'scale',
+        scaleMinLabel: 'Muito pouco seguros',
+        scaleMaxLabel: 'Muito seguros',
+      },
+      {
+        id: '8.9',
+        label: 'A organização realiza avaliação de desempenho?',
+        type: 'radio',
+        options: [
+          'Sim, formalmente e de maneira periódica',
+          'Sim, mas sem periodicidade definida',
+          'Apenas durante o período de experiência',
+          'Informalmente',
+          'Não realiza',
+          'Está implantando',
+        ],
+      },
+      {
+        id: '8.10',
+        label: 'Há práticas de feedback individual?',
+        type: 'radio',
+        options: ['Sim, regularmente', 'Sim, ocasionalmente', 'Apenas quando há problemas', 'Depende do gestor', 'Não', 'Não sei'],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '9',
+    title: 'Metas, cobranças e desempenho',
+    fields: [
+      {
+        id: '9.1',
+        label: 'A organização trabalha com metas individuais ou coletivas?',
+        type: 'checkbox',
+        options: [
+          'Metas individuais',
+          'Metas por equipe',
+          'Metas por departamento',
+          'Metas gerais da empresa',
+          'Metas comerciais',
+          'Metas de produção',
+          'Metas de produtividade',
+          'Metas de qualidade',
+          'Metas de atendimento',
+          'Prazos ou níveis de serviço',
+          'Não trabalha com metas formais',
+        ],
+      },
+      {
+        id: '9.2',
+        label: 'Como as metas são definidas?',
+        type: 'radio',
+        options: [
+          'Com participação dos trabalhadores',
+          'Pela liderança imediata',
+          'Pela diretoria',
+          'Pela matriz, cliente ou contratante',
+          'Por sistemas ou plataformas',
+          'Não há processo formal',
+          'Não sei',
+        ],
+      },
+      {
+        id: '9.3',
+        label: 'As metas são consideradas alcançáveis?',
+        type: 'scale',
+        scaleMinLabel: 'Geralmente inalcançáveis',
+        scaleMaxLabel: 'Geralmente alcançáveis',
+      },
+      {
+        id: '9.4',
+        label: 'Como ocorre o acompanhamento das metas?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Reuniões individuais',
+          'Reuniões coletivas',
+          'Painéis visíveis',
+          'Rankings',
+          'Sistemas',
+          'Mensagens ou cobranças diárias',
+          'Relatórios periódicos',
+          'Não há acompanhamento estruturado',
+          'Outro',
+        ],
+      },
+      {
+        id: '9.5',
+        label: 'O não atingimento das metas pode gerar:',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Orientação',
+          'Plano de melhoria',
+          'Treinamento',
+          'Perda de bônus ou comissão',
+          'Exposição em reuniões ou rankings',
+          'Advertência',
+          'Ameaça de desligamento',
+          'Desligamento',
+          'Não há consequência definida',
+          'Outro',
+        ],
+      },
+      {
+        id: '9.6',
+        label: 'A empresa identifica pressão excessiva por resultados em algum setor?',
+        type: 'radio',
+        options: ['Sim', 'Não', 'Não sabemos'],
+      },
+      {
+        id: '9.7',
+        label: 'Em caso positivo, informe quais setores ou funções',
+        type: 'paragraph',
+        showIf: (v) => str(v['9.6']) === 'Sim',
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '10',
+    title: 'Práticas de saúde, segurança e conformidade',
+    fields: [
+      { id: '10.1', label: 'A organização possui Programa de Gerenciamento de Riscos — PGR?', type: 'radio', options: DOC_STATUS },
+      { id: '10.2', label: 'A organização possui inventário de riscos ocupacionais?', type: 'radio', options: DOC_STATUS },
+      {
+        id: '10.3',
+        label: 'O inventário atual contempla fatores de riscos psicossociais relacionados ao trabalho?',
+        type: 'radio',
+        options: ['Sim', 'Parcialmente', 'Não', 'Não sabemos', 'O documento está em revisão'],
+      },
+      {
+        id: '10.4',
+        label: 'A organização possui Programa de Controle Médico de Saúde Ocupacional — PCMSO?',
+        type: 'radio',
+        options: DOC_STATUS,
+      },
+      {
+        id: '10.5',
+        label: 'A empresa possui Serviço Especializado em Segurança e Medicina do Trabalho — SESMT?',
+        type: 'radio',
+        options: ['Próprio', 'Terceirizado', 'Próprio e terceirizado', 'Não possui', 'Não sei'],
+      },
+      {
+        id: '10.6',
+        label: 'Quais profissionais ou fornecedores já atendem a empresa?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Médico do trabalho',
+          'Engenheiro de segurança do trabalho',
+          'Técnico de segurança do trabalho',
+          'Enfermeiro do trabalho',
+          'Psicólogo',
+          'Ergonomista',
+          'Fisioterapeuta',
+          'Consultoria de Recursos Humanos',
+          'Consultoria jurídica trabalhista',
+          'Clínica de saúde ocupacional',
+          'Outro',
+        ],
+      },
+      {
+        id: '10.7',
+        label: 'A organização possui Análise Ergonômica do Trabalho — AET?',
+        type: 'radio',
+        options: ['Sim, abrangendo toda a organização', 'Sim, para algumas atividades', 'Está sendo realizada', 'Não', 'Não sei'],
+      },
+      {
+        id: '10.8',
+        label: 'A empresa possui CIPA ou representante nomeado?',
+        type: 'radio',
+        options: ['CIPA constituída', 'Representante nomeado', 'Não se aplica', 'Não possui', 'Não sei'],
+      },
+      {
+        id: '10.9',
+        label: 'Quando foi realizada a última revisão do PGR?',
+        type: 'text',
+        placeholder: 'Ex.: 03/2025, "há dois anos" ou "não sei"',
+      },
+      {
+        id: '10.10',
+        label: 'Já houve fiscalização, notificação, autuação ou recomendação relacionada à saúde e segurança do trabalho?',
+        type: 'radio',
+        options: [
+          'Não',
+          'Sim, nos últimos 12 meses',
+          'Sim, há mais de 12 meses',
+          'Existe fiscalização ou procedimento em andamento',
+          'Prefiro tratar em reunião',
+          'Não sei',
+        ],
+      },
+      {
+        id: '10.11',
+        label: 'Existem ações judiciais, procedimentos administrativos ou recomendações envolvendo:',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Assédio moral',
+          'Assédio sexual',
+          'Discriminação',
+          'Jornada excessiva',
+          'Doença ocupacional',
+          'Acidente de trabalho',
+          'Adoecimento mental relacionado ao trabalho',
+          'Danos morais',
+          'Condições inadequadas de trabalho',
+          'Não há casos conhecidos',
+          'Prefiro tratar em reunião',
+          'Outro',
+        ],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '11',
+    title: 'Indicadores de pessoas e saúde organizacional',
+    intro:
+      'Nesta etapa, forneça apenas dados consolidados. Não inclua nomes, diagnósticos individuais ou informações que permitam identificar trabalhadores.',
+    fields: [
+      {
+        id: '11.1',
+        label: 'A empresa acompanha regularmente os indicadores abaixo?',
+        type: 'grid',
+        rowHeader: 'Indicador',
+        rows: [
+          'Absenteísmo',
+          'Afastamentos previdenciários',
+          'Rotatividade',
+          'Pedidos de desligamento',
+          'Acidentes de trabalho',
+          'Atestados médicos',
+          'Horas extras',
+          'Reclamações trabalhistas',
+          'Denúncias internas',
+          'Clima organizacional',
+          'Produtividade',
+          'Reclamações de clientes',
+        ],
+        columns: ['Acompanhamos', 'Temos dados parciais', 'Não acompanhamos', 'Não sei'],
+      },
+      {
+        id: '11.2',
+        label: 'Como a empresa classifica sua rotatividade nos últimos 12 meses?',
+        type: 'radio',
+        options: ['Muito baixa', 'Baixa', 'Moderada', 'Alta', 'Muito alta', 'Não sabemos'],
+      },
+      {
+        id: '11.3',
+        label: 'Em quais setores há maior número de desligamentos ou pedidos de demissão?',
+        type: 'paragraph',
+      },
+      {
+        id: '11.4',
+        label: 'Como a empresa classifica seu índice de faltas e afastamentos?',
+        type: 'radio',
+        options: ['Muito baixo', 'Baixo', 'Moderado', 'Alto', 'Muito alto', 'Não sabemos'],
+      },
+      {
+        id: '11.5',
+        label: 'A organização percebe aumento recente de:',
+        type: 'checkbox',
+        options: [
+          'Atestados',
+          'Faltas',
+          'Atrasos',
+          'Afastamentos',
+          'Pedidos de desligamento',
+          'Conflitos',
+          'Reclamações',
+          'Erros ou retrabalho',
+          'Acidentes ou incidentes',
+          'Queda de produtividade',
+          'Desmotivação',
+          'Irritabilidade',
+          'Exaustão',
+          'Queixas relacionadas à liderança',
+          'Não percebemos aumento significativo',
+          'Não temos dados suficientes',
+        ],
+      },
+      {
+        id: '11.6',
+        label: 'Há conhecimento de afastamentos ou queixas relacionados a:',
+        type: 'checkbox',
+        options: [
+          'Estresse',
+          'Ansiedade',
+          'Depressão',
+          'Esgotamento ou burnout',
+          'Insônia',
+          'Crises emocionais',
+          'Uso problemático de álcool ou outras substâncias',
+          'Conflitos ou assédio',
+          'Sobrecarga de trabalho',
+          'Não temos conhecimento',
+          'Não possuímos dados consolidados',
+          'Prefiro tratar em reunião',
+        ],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '12',
+    title: 'Cultura, clima e relações de trabalho',
+    fields: [
+      {
+        id: '12.1',
+        label: 'A empresa já realizou pesquisa de clima organizacional?',
+        type: 'radio',
+        options: [
+          'Sim, nos últimos 12 meses',
+          'Sim, entre 1 e 2 anos',
+          'Sim, há mais de 2 anos',
+          'Nunca realizou',
+          'Está planejando realizar',
+        ],
+      },
+      {
+        id: '12.2',
+        label: 'Como a direção acredita que os trabalhadores descreveriam o ambiente de trabalho?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Colaborativo',
+          'Acolhedor',
+          'Organizado',
+          'Exigente',
+          'Competitivo',
+          'Inovador',
+          'Hierarquizado',
+          'Informal',
+          'Centralizador',
+          'Instável',
+          'Conflituoso',
+          'Sob pressão',
+          'Com boa comunicação',
+          'Com pouca comunicação',
+          'Com oportunidades de crescimento',
+          'Com pouco reconhecimento',
+          'Outro',
+        ],
+      },
+      { id: '12.3', label: 'Quais valores a organização procura promover?', type: 'paragraph' },
+      {
+        id: '12.4',
+        label: 'Na prática, quais comportamentos são mais recompensados na organização?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Qualidade',
+          'Produtividade',
+          'Cumprimento de metas',
+          'Cooperação',
+          'Inovação',
+          'Obediência',
+          'Disponibilidade',
+          'Competitividade',
+          'Atendimento ao cliente',
+          'Redução de custos',
+          'Assunção de responsabilidades',
+          'Não há critérios claros',
+          'Outro',
+        ],
+      },
+      {
+        id: '12.5',
+        label:
+          'Existem comportamentos inadequados que, embora não sejam formalmente aceitos, acabam sendo tolerados?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Gritos ou tratamento desrespeitoso',
+          'Humilhações',
+          'Piadas ofensivas',
+          'Discriminação',
+          'Cobranças fora do horário',
+          'Exposição pública de erros',
+          'Favoritismo',
+          'Retaliação',
+          'Competição desleal',
+          'Sobrecarga recorrente',
+          'Descumprimento de pausas ou jornadas',
+          'Não temos conhecimento',
+          'Prefiro tratar em reunião',
+          'Outro',
+        ],
+      },
+      {
+        id: '12.6',
+        label: 'Os trabalhadores participam de decisões que afetam sua rotina?',
+        type: 'scale',
+        scaleMinLabel: 'Nunca',
+        scaleMaxLabel: 'Frequentemente',
+      },
+      {
+        id: '12.7',
+        label: 'Existe abertura real para sugestões de melhoria?',
+        type: 'scale',
+        scaleMinLabel: 'Muito pouca',
+        scaleMaxLabel: 'Muito elevada',
+      },
+      {
+        id: '12.8',
+        label: 'A organização acredita que há confiança entre trabalhadores e lideranças?',
+        type: 'scale',
+        scaleMinLabel: 'Muito baixa',
+        scaleMaxLabel: 'Muito alta',
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '13',
+    title: 'Assédio, discriminação, violência e canais de escuta',
+    fields: [
+      {
+        id: '13.1',
+        label: 'A organização possui política formal de prevenção e enfrentamento ao assédio?',
+        type: 'radio',
+        options: ['Sim, implantada e divulgada', 'Sim, mas pouco divulgada', 'Está em elaboração', 'Não', 'Não sei'],
+      },
+      {
+        id: '13.2',
+        label: 'Existe canal de denúncia ou escuta?',
+        type: 'radio',
+        options: [
+          'Sim, interno',
+          'Sim, operado por empresa externa',
+          'Sim, mas informal',
+          'Está sendo implantado',
+          'Não existe',
+          'Não sei',
+        ],
+      },
+      { id: '13.3', label: 'O canal permite manifestação anônima?', type: 'radio', options: SIM_NAO_NAO_SEI },
+      {
+        id: '13.4',
+        label: 'Existem procedimentos definidos para apuração e tratamento das manifestações?',
+        type: 'radio',
+        options: ['Sim', 'Parcialmente', 'Não', 'Não sei'],
+      },
+      {
+        id: '13.5',
+        label: 'Houve denúncias ou queixas nos últimos 24 meses?',
+        type: 'radio',
+        options: [
+          'Não',
+          'Sim, casos pontuais',
+          'Sim, diferentes casos',
+          'Não temos registro consolidado',
+          'Prefiro tratar em reunião',
+        ],
+      },
+      {
+        id: '13.6',
+        label: 'Quais situações já foram relatadas?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Assédio moral',
+          'Assédio sexual',
+          'Discriminação',
+          'Ameaça',
+          'Agressão verbal',
+          'Agressão física',
+          'Retaliação',
+          'Perseguição',
+          'Conflitos interpessoais',
+          'Condutas inadequadas de clientes ou usuários',
+          'Não houve relatos',
+          'Prefiro tratar em reunião',
+          'Outro',
+        ],
+      },
+      {
+        id: '13.7',
+        label: 'Há risco de agressão ou violência praticada por clientes, usuários, pacientes ou terceiros?',
+        type: 'radio',
+        options: ['Não', 'Baixo', 'Moderado', 'Alto', 'Muito alto', 'Não sabemos'],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '14',
+    title: 'Desenvolvimento, reconhecimento e integração',
+    fields: [
+      {
+        id: '14.1',
+        label: 'A organização possui processo estruturado de integração de novos trabalhadores?',
+        type: 'radio',
+        options: ['Sim, completo e documentado', 'Sim, mas informal', 'Depende do setor', 'Não', 'Está em implantação'],
+      },
+      {
+        id: '14.2',
+        label: 'Com que frequência são oferecidos treinamentos ou capacitações?',
+        type: 'radio',
+        options: [
+          'Mensalmente',
+          'Trimestralmente',
+          'Semestralmente',
+          'Anualmente',
+          'Apenas quando necessário',
+          'Raramente',
+          'Nunca',
+        ],
+      },
+      {
+        id: '14.3',
+        label: 'Que tipos de capacitação são realizados?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Integração',
+          'Capacitação técnica',
+          'Segurança do trabalho',
+          'Atendimento ao cliente',
+          'Liderança',
+          'Comunicação',
+          'Gestão de conflitos',
+          'Saúde mental',
+          'Prevenção ao assédio',
+          'Diversidade e inclusão',
+          'Gestão do tempo',
+          'Trabalho em equipe',
+          'Outro',
+        ],
+      },
+      {
+        id: '14.4',
+        label: 'Existem oportunidades claras de crescimento ou desenvolvimento profissional?',
+        type: 'scale',
+        scaleMinLabel: 'Não existem',
+        scaleMaxLabel: 'Existem claramente',
+      },
+      {
+        id: '14.5',
+        label: 'Como a empresa reconhece os trabalhadores?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Feedback positivo',
+          'Premiações',
+          'Bonificações',
+          'Promoções',
+          'Celebrações internas',
+          'Certificados ou homenagens',
+          'Comunicação pública',
+          'Benefícios adicionais',
+          'Não há prática estruturada de reconhecimento',
+          'Outro',
+        ],
+      },
+      {
+        id: '14.6',
+        label: 'A organização promove ações de integração ou convivência?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Confraternização anual',
+          'Celebração de aniversários',
+          'Celebração de resultados',
+          'Eventos em datas comemorativas',
+          'Atividades esportivas',
+          'Ações de saúde e bem-estar',
+          'Campanhas sociais',
+          'Encontros de equipe',
+          'Não realiza',
+          'Outro',
+        ],
+      },
+      {
+        id: '14.7',
+        label: 'Como você avalia a participação dos trabalhadores nessas ações?',
+        type: 'radio',
+        options: ['Muito alta', 'Alta', 'Moderada', 'Baixa', 'Muito baixa', 'Não realizamos essas ações'],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '15',
+    title: 'Principais gargalos e desafios',
+    fields: [
+      {
+        id: '15.1',
+        label: 'Quais são atualmente os principais desafios da organização?',
+        type: 'checkbox',
+        help: 'Selecione até 10 opções.',
+        maxSelections: 10,
+        allowOther: true,
+        options: [
+          'Atração e recrutamento',
+          'Integração de novos trabalhadores',
+          'Retenção de talentos',
+          'Rotatividade',
+          'Absenteísmo',
+          'Afastamentos',
+          'Sobrecarga de trabalho',
+          'Falta de pessoal',
+          'Baixa produtividade',
+          'Falhas de planejamento',
+          'Falhas de execução',
+          'Retrabalho',
+          'Erros operacionais',
+          'Descumprimento de prazos',
+          'Controle de qualidade',
+          'Comunicação interna',
+          'Comunicação entre departamentos',
+          'Conflitos interpessoais',
+          'Liderança',
+          'Centralização das decisões',
+          'Falta de autonomia',
+          'Falta de clareza nas funções',
+          'Metas excessivas ou pouco claras',
+          'Atendimento ao cliente',
+          'Relacionamento com clientes',
+          'Relacionamento com fornecedores',
+          'Vendas',
+          'Entrega de produtos ou serviços',
+          'Logística',
+          'Pós-venda',
+          'Organização administrativa',
+          'Processos financeiros',
+          'Cobrança e inadimplência',
+          'Tecnologia e sistemas',
+          'Cultura organizacional',
+          'Resistência a mudanças',
+          'Falta de comprometimento',
+          'Desmotivação',
+          'Assédio ou condutas inadequadas',
+          'Saúde mental',
+          'Preparação das lideranças',
+          'Sucessão de cargos',
+          'Outro',
+        ],
+      },
+      {
+        id: '15.2',
+        label: 'Dentre os desafios selecionados, indique os três mais urgentes',
+        type: 'paragraph',
+        help: 'Liste em ordem de urgência: 1º, 2º e 3º.',
+      },
+      {
+        id: '15.3',
+        label: 'Na avaliação da direção, quais são as principais causas desses problemas?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Crescimento rápido',
+          'Falta de planejamento',
+          'Estrutura insuficiente',
+          'Falta de trabalhadores',
+          'Processos pouco definidos',
+          'Falta de treinamento',
+          'Problemas de liderança',
+          'Falta de comunicação',
+          'Sistemas inadequados',
+          'Metas incompatíveis com a estrutura',
+          'Problemas de remuneração',
+          'Falta de reconhecimento',
+          'Conflitos históricos',
+          'Resistência cultural',
+          'Mudanças recentes',
+          'Fatores externos ou de mercado',
+          'Ainda não conseguimos identificar',
+          'Outro',
+        ],
+      },
+      { id: '15.4', label: 'Quais setores ou grupos parecem mais afetados?', type: 'paragraph' },
+      {
+        id: '15.5',
+        label: 'Há algum acontecimento recente que tenha afetado significativamente o ambiente de trabalho?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Reestruturação',
+          'Demissões',
+          'Crescimento ou expansão',
+          'Mudança de direção',
+          'Mudança de liderança',
+          'Fusão ou aquisição',
+          'Mudança de sede',
+          'Implantação de sistema',
+          'Perda de cliente ou contrato',
+          'Crise financeira',
+          'Acidente grave',
+          'Falecimento',
+          'Denúncia ou conflito relevante',
+          'Fiscalização',
+          'Alteração de metas',
+          'Não houve acontecimento relevante',
+          'Outro',
+        ],
+      },
+      { id: '15.6', label: 'Descreva brevemente o contexto', type: 'paragraph' },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '16',
+    title: 'Maturidade e disposição para mudança',
+    fields: [
+      {
+        id: '16.1',
+        label: 'Qual é a principal motivação da organização para contratar este trabalho?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Atender às exigências da NR-1',
+          'Atualizar o PGR',
+          'Prevenir autuações e passivos',
+          'Melhorar a saúde e o bem-estar dos trabalhadores',
+          'Investigar aumento de afastamentos ou atestados',
+          'Reduzir rotatividade',
+          'Melhorar o clima organizacional',
+          'Preparar ou desenvolver lideranças',
+          'Identificar riscos de assédio',
+          'Melhorar processos e produtividade',
+          'Responder a fiscalização ou recomendação',
+          'Atender exigência de cliente, matriz ou certificação',
+          'Implantar política de saúde mental',
+          'Outro',
+        ],
+      },
+      {
+        id: '16.2',
+        label: 'Qual é o nível de prioridade do projeto?',
+        type: 'radio',
+        options: [
+          'Emergencial',
+          'Alta prioridade',
+          'Prioridade moderada',
+          'Preventivo, sem urgência imediata',
+          'Estamos apenas pesquisando possibilidades',
+        ],
+      },
+      {
+        id: '16.3',
+        label: 'Como você avalia a disposição da alta direção para realizar mudanças?',
+        type: 'scale',
+        scaleMinLabel: 'Muito baixa',
+        scaleMaxLabel: 'Muito alta',
+      },
+      {
+        id: '16.4',
+        label: 'A direção está disposta a rever:',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Processos de trabalho',
+          'Distribuição de tarefas',
+          'Dimensionamento das equipes',
+          'Metas',
+          'Jornadas e escalas',
+          'Práticas de liderança',
+          'Comunicação interna',
+          'Políticas de remuneração e reconhecimento',
+          'Estrutura organizacional',
+          'Canais de denúncia e escuta',
+          'Práticas de prevenção ao assédio',
+          'Capacitação das lideranças',
+          'Cultura organizacional',
+          'Ainda não há definição',
+          'Outro',
+        ],
+      },
+      {
+        id: '16.5',
+        label: 'Qual seria a maior dificuldade para implementar mudanças?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Limitação financeira',
+          'Falta de tempo',
+          'Resistência da direção',
+          'Resistência das lideranças',
+          'Resistência dos trabalhadores',
+          'Falta de equipe interna',
+          'Falta de dados',
+          'Falta de conhecimento técnico',
+          'Estrutura muito enxuta',
+          'Processos dependentes de clientes ou terceiros',
+          'Cultura consolidada',
+          'Não sabemos',
+          'Outro',
+        ],
+      },
+      {
+        id: '16.6',
+        label:
+          'A alta direção participará da abertura, validação dos resultados e acompanhamento do plano de ação?',
+        type: 'radio',
+        options: ['Sim', 'Provavelmente', 'Apenas em algumas etapas', 'Ainda não foi definido', 'Não'],
+      },
+      {
+        id: '16.7',
+        label: 'A empresa consegue designar uma equipe ou responsável interno para acompanhar o projeto?',
+        type: 'radio',
+        options: ['Sim', 'Não', 'Ainda não foi definido'],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '17',
+    title: 'Escopo pretendido',
+    fields: [
+      {
+        id: '17.1',
+        label: 'Quais serviços despertam interesse inicial?',
+        type: 'checkbox',
+        options: [
+          'Reunião de alinhamento com a direção',
+          'Análise documental',
+          'Visita técnica',
+          'Mapeamento dos processos e da organização do trabalho',
+          'Aplicação de questionário aos trabalhadores',
+          'Entrevistas individuais',
+          'Entrevistas com lideranças',
+          'Grupos focais',
+          'Avaliação por departamentos ou grupos homogêneos',
+          'Avaliação específica das lideranças',
+          'Diagnóstico de riscos psicossociais',
+          'Relatório técnico',
+          'Apresentação dos resultados à direção',
+          'Devolutiva aos trabalhadores',
+          'Apoio à atualização do inventário de riscos',
+          'Elaboração de plano de ação',
+          'Capacitação das lideranças',
+          'Capacitação dos trabalhadores',
+          'Política de prevenção ao assédio',
+          'Implantação ou revisão de canal de escuta',
+          'Acompanhamento da execução do plano',
+          'Reavaliação posterior',
+          'Consultoria continuada',
+          'Ainda precisamos de orientação para definir',
+        ],
+      },
+      {
+        id: '17.2',
+        label: 'A empresa deseja avaliar:',
+        type: 'radio',
+        options: [
+          'Toda a organização de uma só vez',
+          'Determinadas unidades',
+          'Determinados departamentos',
+          'Primeiramente um projeto-piloto',
+          'Ainda não sabemos',
+        ],
+      },
+      {
+        id: '17.3',
+        label: 'O projeto deverá ocorrer:',
+        type: 'checkbox',
+        options: [
+          'Presencialmente',
+          'Remotamente',
+          'Em formato híbrido',
+          'Durante o horário de trabalho',
+          'Fora do horário de trabalho',
+          'Em diferentes turnos',
+          'Ainda será definido',
+        ],
+      },
+      {
+        id: '17.4',
+        label: 'A organização possui estrutura para aplicação presencial?',
+        type: 'checkbox',
+        options: [
+          'Sala reservada',
+          'Auditório',
+          'Computadores',
+          'Tablets',
+          'Acesso à internet',
+          'Espaço para entrevistas',
+          'Não possui estrutura adequada',
+          'Precisa de orientação',
+        ],
+      },
+      {
+        id: '17.5',
+        label: 'Os trabalhadores possuem acesso individual a:',
+        type: 'checkbox',
+        options: [
+          'E-mail corporativo',
+          'Telefone celular',
+          'WhatsApp',
+          'Computador',
+          'Internet no local de trabalho',
+          'Nenhum desses recursos de forma generalizada',
+        ],
+      },
+      {
+        id: '17.6',
+        label: 'Há trabalhadores com dificuldade de leitura, acesso digital ou necessidade de acessibilidade?',
+        type: 'radio',
+        options: [
+          'Não',
+          'Sim, dificuldade de leitura',
+          'Sim, dificuldade de acesso digital',
+          'Sim, deficiência ou necessidade de acessibilidade',
+          'Sim, trabalhadores estrangeiros',
+          'Não sabemos',
+        ],
+      },
+      {
+        id: '17.7',
+        label: 'Será necessário aplicar instrumentos em mais de um idioma?',
+        type: 'radio',
+        options: SIM_NAO_NAO_SEI,
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '18',
+    title: 'Prazos e expectativas',
+    fields: [
+      {
+        id: '18.1',
+        label: 'Existe prazo desejado para início?',
+        type: 'radio',
+        options: [
+          'Imediatamente',
+          'Em até 30 dias',
+          'Entre 31 e 60 dias',
+          'Entre 61 e 90 dias',
+          'Após 90 dias',
+          'Ainda não foi definido',
+        ],
+      },
+      {
+        id: '18.2',
+        label: 'Existe data-limite para conclusão?',
+        type: 'text',
+        placeholder: 'Ex.: 30/11/2026 ou "não há data definida"',
+      },
+      {
+        id: '18.3',
+        label: 'O prazo está relacionado a:',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Planejamento interno',
+          'Revisão do PGR',
+          'Fiscalização',
+          'Auditoria',
+          'Certificação',
+          'Exigência de cliente ou contratante',
+          'Negociação coletiva',
+          'Procedimento jurídico ou administrativo',
+          'Planejamento orçamentário',
+          'Não há prazo externo',
+          'Outro',
+        ],
+      },
+      { id: '18.4', label: 'Qual resultado a organização espera obter?', type: 'paragraph' },
+      {
+        id: '18.5',
+        label: 'Como a organização saberá que o projeto foi bem-sucedido?',
+        type: 'checkbox',
+        allowOther: true,
+        options: [
+          'Adequação documental',
+          'Identificação dos principais riscos',
+          'Redução de afastamentos',
+          'Redução da rotatividade',
+          'Redução de conflitos',
+          'Melhoria do clima',
+          'Melhoria da comunicação',
+          'Desenvolvimento das lideranças',
+          'Aumento da produtividade',
+          'Redução de reclamações',
+          'Implementação de medidas preventivas',
+          'Criação de indicadores',
+          'Outro',
+        ],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '19',
+    title: 'Informações financeiras e orçamentárias',
+    intro:
+      'Estas informações são utilizadas exclusivamente para compreender o porte da organização, sua capacidade de investimento e a forma mais adequada de estruturar a proposta. O preenchimento é opcional.',
+    fields: [
+      {
+        id: '19.1',
+        label: 'Faixa aproximada de faturamento bruto anual',
+        type: 'radio',
+        options: [
+          'Até R$ 360 mil',
+          'De R$ 360 mil a R$ 1 milhão',
+          'De R$ 1 milhão a R$ 4,8 milhões',
+          'De R$ 4,8 milhões a R$ 10 milhões',
+          'De R$ 10 milhões a R$ 50 milhões',
+          'De R$ 50 milhões a R$ 100 milhões',
+          'Acima de R$ 100 milhões',
+          'Prefiro informar em reunião',
+          'Não tenho acesso a essa informação',
+        ],
+      },
+      {
+        id: '19.2',
+        label: 'A organização possui orçamento previsto para este projeto?',
+        type: 'radio',
+        options: [
+          'Sim',
+          'Existe uma estimativa, mas ainda não foi aprovada',
+          'O orçamento dependerá da proposta',
+          'Não existe orçamento reservado',
+          'Não tenho essa informação',
+        ],
+      },
+      {
+        id: '19.3',
+        label: 'Qual faixa de investimento a organização considera viável neste momento?',
+        type: 'radio',
+        options: [
+          'Até R$ 5.000',
+          'De R$ 5.001 a R$ 10.000',
+          'De R$ 10.001 a R$ 20.000',
+          'De R$ 20.001 a R$ 40.000',
+          'De R$ 40.001 a R$ 80.000',
+          'Acima de R$ 80.000',
+          'Precisamos conhecer o escopo antes de estimar',
+          'Prefiro tratar em reunião',
+        ],
+      },
+      {
+        id: '19.4',
+        label: 'Existe preferência de contratação?',
+        type: 'checkbox',
+        options: [
+          'Projeto fechado',
+          'Contratação por etapas',
+          'Pagamento mensal',
+          'Consultoria recorrente',
+          'Projeto-piloto seguido de expansão',
+          'Ainda não sabemos',
+        ],
+      },
+      {
+        id: '19.5',
+        label: 'Há necessidade de mais de uma proposta ou cenário de contratação?',
+        type: 'radio',
+        options: [
+          'Não',
+          'Sim, cenário essencial e cenário completo',
+          'Sim, opções por número de participantes',
+          'Sim, opções por unidade ou departamento',
+          'Ainda não sabemos',
+        ],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '20',
+    title: 'Documentos disponíveis',
+    fields: [
+      {
+        id: '20.1',
+        label: 'Quais documentos poderão ser disponibilizados durante o projeto?',
+        type: 'checkbox',
+        options: [
+          'PGR',
+          'Inventário de riscos',
+          'PCMSO',
+          'AET',
+          'Organograma',
+          'Descrição de cargos',
+          'Quadro de trabalhadores',
+          'Escalas e jornadas',
+          'Registros de horas extras',
+          'Indicadores de absenteísmo',
+          'Indicadores de rotatividade',
+          'Dados consolidados de afastamentos',
+          'Pesquisa de clima',
+          'Avaliação de desempenho',
+          'Código de conduta',
+          'Política de prevenção ao assédio',
+          'Registros consolidados do canal de denúncias',
+          'Políticas de cargos e salários',
+          'Relatórios de acidentes',
+          'Relatórios de auditoria',
+          'Ações ou notificações trabalhistas',
+          'Nenhum desses documentos',
+          'Ainda precisamos verificar',
+        ],
+      },
+      { id: '20.2', label: 'Há restrições para o compartilhamento de documentos?', type: 'radio', options: SIM_NAO },
+      {
+        id: '20.3',
+        label: 'A empresa exige assinatura de termo de confidencialidade?',
+        type: 'radio',
+        options: ['Sim', 'Não', 'Ainda não definido'],
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '21',
+    title: 'Percepção inicial do respondente',
+    intro: 'Esta etapa registra sua leitura pessoal do momento da organização.',
+    fields: [
+      {
+        id: '21.1',
+        label: 'Considerando sua percepção pessoal, atribua uma nota ao ambiente de trabalho atual',
+        type: 'scale',
+        scaleMin: 0,
+        scaleMax: 10,
+        scaleMinLabel: 'Muito insatisfatório',
+        scaleMaxLabel: 'Excelente',
+      },
+      { id: '21.2', label: 'Qual é hoje o maior risco humano ou organizacional da empresa?', type: 'paragraph' },
+      { id: '21.3', label: 'Qual problema mais preocupa a direção?', type: 'paragraph' },
+      { id: '21.4', label: 'Qual problema mais parece preocupar os trabalhadores?', type: 'paragraph' },
+      { id: '21.5', label: 'O que a organização já tentou fazer para resolver esses problemas?', type: 'paragraph' },
+      { id: '21.6', label: 'O que funcionou?', type: 'paragraph' },
+      { id: '21.7', label: 'O que não funcionou?', type: 'paragraph' },
+      {
+        id: '21.8',
+        label: 'Existe alguma informação relevante que não tenha sido contemplada neste formulário?',
+        type: 'paragraph',
+      },
+    ],
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    number: '22',
+    title: 'Próximos passos e autorizações',
+    intro: 'Última etapa. Confirme os dados de contato e as autorizações para que possamos dar seguimento.',
+    fields: [
+      {
+        id: '22.1',
+        label: 'Como conheceu a Cosmmus Business?',
+        type: 'radio',
+        allowOther: true,
+        options: [
+          'Indicação',
+          'Redes sociais',
+          'Pesquisa na internet',
+          'Evento ou palestra',
+          'Cliente ou parceiro',
+          'Contato comercial',
+          'Outro',
+        ],
+      },
+      {
+        id: '22.2',
+        label: 'Qual é o melhor canal para contato?',
+        type: 'radio',
+        options: ['WhatsApp', 'Telefone', 'E-mail', 'Videoconferência'],
+      },
+      {
+        id: '22.3',
+        label: 'Quais são os melhores dias e horários para contato?',
+        type: 'text',
+        placeholder: 'Ex.: segunda a quinta, das 14h às 18h',
+      },
+      {
+        id: '22.4',
+        label:
+          'Autoriza a Cosmmus Business a entrar em contato para solicitar esclarecimentos e apresentar proposta técnica e comercial?',
+        type: 'radio',
+        required: true,
+        options: SIM_NAO,
+      },
+      {
+        id: '22.5',
+        label:
+          'Declaro que as informações fornecidas neste formulário representam, tanto quanto possível, a realidade conhecida da organização. Estou ciente de que este levantamento possui caráter preliminar e não substitui avaliação técnica, diagnóstico organizacional, avaliação psicológica, inventário de riscos ou demais documentos exigidos pelas normas de saúde e segurança do trabalho.',
+        type: 'consent',
+        required: true,
+      },
+      {
+        id: '22.6',
+        label:
+          'Autorizo o tratamento dos dados de contato e das informações organizacionais fornecidas para análise da solicitação, elaboração de proposta, comunicação comercial e eventual execução dos serviços, conforme a legislação aplicável.',
+        type: 'consent',
+        required: true,
+      },
+    ],
+  },
+];
+
+/** Todos os campos, na ordem do formulário. */
+export const allFields: FieldDef[] = formSections.flatMap((s) => s.fields);
+
+/**
+ * Cabeçalhos das colunas da planilha, na ordem do formulário.
+ * Campos compostos (grade e grupo numérico) geram uma coluna por linha.
+ */
+export const buildHeaders = (): string[] => {
+  const headers = ['Data/hora', 'Protocolo'];
+  for (const field of allFields) {
+    if (field.type === 'grid' || field.type === 'numberGroup') {
+      for (const row of field.rows || []) {
+        headers.push(`${field.id} ${field.label} [${row}]`);
+      }
+    } else {
+      headers.push(`${field.id} ${field.label}`);
+    }
+    if (field.allowOther) {
+      headers.push(`${field.id} ${field.label} [Outro - especificar]`);
+    }
+  }
+  return headers;
+};
+
+/** Converte os valores do formulário em uma linha alinhada a buildHeaders(). */
+export const buildRow = (values: FormValues, protocol: string, timestamp: string): string[] => {
+  const row: string[] = [timestamp, protocol];
+  for (const field of allFields) {
+    const value = values[field.id];
+    if (field.type === 'grid' || field.type === 'numberGroup') {
+      const record = (value && typeof value === 'object' && !Array.isArray(value) ? value : {}) as Record<string, string>;
+      for (const rowLabel of field.rows || []) {
+        row.push(record[rowLabel] ?? '');
+      }
+    } else if (Array.isArray(value)) {
+      row.push(value.join('; '));
+    } else if (field.type === 'consent') {
+      row.push(value === 'true' ? 'Sim' : 'Não');
+    } else {
+      row.push(typeof value === 'string' ? value : '');
+    }
+    if (field.allowOther) {
+      const other = values[field.id + OTHER_SUFFIX];
+      row.push(typeof other === 'string' ? other : '');
+    }
+  }
+  return row;
+};

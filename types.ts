@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type ViewState = 'home' | 'about' | 'services' | 'methodology' | 'cases' | 'blog' | 'contact' | 'admin' | 'simulation' | 'service-details' | 'case-details';
+export type ViewState = 'home' | 'about' | 'services' | 'methodology' | 'cases' | 'blog' | 'contact' | 'admin' | 'simulation' | 'service-details' | 'case-details' | 'aplicacao';
 
 export interface SubService {
   title: string;
