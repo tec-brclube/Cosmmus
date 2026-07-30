@@ -18,7 +18,9 @@ import SpaceBackground from './components/SpaceBackground';
 import WhatsAppButton from './components/WhatsAppButton';
 import CtaSection from './components/CtaSection';
 import ApplicationForm from './components/aplicacao/ApplicationForm';
-import Team from './components/Team';
+import Team from './components/equipe/Team';
+import MemberPage from './components/equipe/MemberPage';
+import { getMemberBySlug } from './components/equipe/teamData';
 
 /** Views com URL própria (as demais são navegadas por estado, na raiz). */
 const ROUTES: Partial<Record<ViewState, string>> = {
@@ -26,37 +28,69 @@ const ROUTES: Partial<Record<ViewState, string>> = {
   equipe: '/equipe',
 };
 
-const viewFromPath = (pathname: string): ViewState | null => {
+/** Prefixo das páginas individuais da equipe: /equipe/<slug> */
+const MEMBER_PREFIX = '/equipe/';
+
+interface Route {
+  view: ViewState;
+  memberSlug?: string;
+}
+
+const routeFromPath = (pathname: string): Route | null => {
   const normalized = pathname.replace(/\/+$/, '').toLowerCase() || '/';
+
+  if (normalized.startsWith(MEMBER_PREFIX)) {
+    const slug = normalized.slice(MEMBER_PREFIX.length);
+    // Slug desconhecido cai na listagem, evitando uma página vazia
+    return getMemberBySlug(slug) ? { view: 'equipe-detalhe', memberSlug: slug } : { view: 'equipe' };
+  }
+
   const entry = Object.entries(ROUTES).find(([, path]) => path === normalized);
-  return entry ? (entry[0] as ViewState) : null;
+  return entry ? { view: entry[0] as ViewState } : null;
+};
+
+/** Endereço correspondente ao estado atual da navegação. */
+const pathFromView = (view: ViewState, memberSlug: string | null): string => {
+  if (view === 'equipe-detalhe' && memberSlug) return `${MEMBER_PREFIX}${memberSlug}`;
+  return ROUTES[view] || '/';
 };
 
 const AppContent: React.FC = () => {
-  const [currentView, setCurrentView] = useState<ViewState>(() => viewFromPath(window.location.pathname) || 'home');
+  const initialRoute = routeFromPath(window.location.pathname);
+  const [currentView, setCurrentView] = useState<ViewState>(initialRoute?.view || 'home');
   const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
   const [currentCaseId, setCurrentCaseId] = useState<string | null>(null);
+  const [currentMemberSlug, setCurrentMemberSlug] = useState<string | null>(initialRoute?.memberSlug || null);
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
   // Scroll to top on view change
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [currentView]);
+  }, [currentView, currentMemberSlug]);
 
   // Mantém a URL sincronizada com as views que possuem endereço próprio
   useEffect(() => {
-    const desired = ROUTES[currentView] || '/';
+    const desired = pathFromView(currentView, currentMemberSlug);
     if (window.location.pathname.replace(/\/+$/, '') !== desired.replace(/\/+$/, '')) {
       window.history.pushState({}, '', desired);
     }
-  }, [currentView]);
+  }, [currentView, currentMemberSlug]);
 
   // Botões voltar/avançar do navegador
   useEffect(() => {
-    const handlePopState = () => setCurrentView(viewFromPath(window.location.pathname) || 'home');
+    const handlePopState = () => {
+      const route = routeFromPath(window.location.pathname);
+      setCurrentView(route?.view || 'home');
+      setCurrentMemberSlug(route?.memberSlug || null);
+    };
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
+
+  const handleViewMember = (slug: string) => {
+    setCurrentMemberSlug(slug);
+    setCurrentView('equipe-detalhe');
+  };
 
   const handleViewService = (serviceId: string) => {
     setCurrentServiceId(serviceId);
@@ -98,7 +132,16 @@ const AppContent: React.FC = () => {
       case 'contact':
         return <Contact />;
       case 'equipe':
-        return <Team onCtaClick={() => setCurrentView('contact')} />;
+        return <Team onViewMember={handleViewMember} onCtaClick={() => setCurrentView('contact')} />;
+      case 'equipe-detalhe':
+        return (
+          <MemberPage
+            slug={currentMemberSlug || ''}
+            onBack={() => setCurrentView('equipe')}
+            onViewMember={handleViewMember}
+            onCtaClick={() => setCurrentView('contact')}
+          />
+        );
       case 'aplicacao':
         return <ApplicationForm />;
       default:
