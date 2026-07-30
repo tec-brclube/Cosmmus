@@ -9,10 +9,22 @@ import {
 } from './formSchema';
 
 /**
- * Endpoint do Google Apps Script (implantado como aplicativo da web).
- * Defina VITE_SHEETS_ENDPOINT no arquivo .env.local — veja docs/FORMULARIO-SHEETS.md.
+ * Endpoint do Google Apps Script (implantado como aplicativo da web) que grava
+ * as respostas na planilha. Veja docs/FORMULARIO-SHEETS.md.
+ *
+ * O endereço fica no código porque variáveis VITE_* são embutidas no bundle
+ * durante o build: mantê-lo em .env não o tornaria mais reservado, apenas
+ * exigiria acesso ao painel da hospedagem para publicar o site. A proteção real
+ * é o script aceitar somente gravação, nunca leitura.
+ *
+ * Para apontar para outra planilha (testes, homologação), defina
+ * VITE_SHEETS_ENDPOINT em .env.local — o valor abaixo é usado apenas quando a
+ * variável não existe.
  */
-const ENDPOINT = (import.meta.env.VITE_SHEETS_ENDPOINT as string | undefined) || '';
+const DEFAULT_ENDPOINT =
+  'https://script.google.com/macros/s/AKfycbzGq45d5Sq5W-YF_elQ6aIcKsjjkFEbJb1HniVcwZ2_15TuYbxk_F5qpkWlMmuW4AdD/exec';
+
+const ENDPOINT = (import.meta.env.VITE_SHEETS_ENDPOINT as string | undefined) || DEFAULT_ENDPOINT;
 
 export const hasEndpoint = (): boolean => ENDPOINT.startsWith('https://');
 

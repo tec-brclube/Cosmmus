@@ -31,7 +31,7 @@ O site sobe em http://localhost:3000
 
 | Variável | Obrigatória | Para que serve |
 | --- | --- | --- |
-| `VITE_SHEETS_ENDPOINT` | Sim, para o formulário | URL do Apps Script que grava as respostas do formulário `/aplicacaocosmmus` na planilha do Google. Veja [docs/FORMULARIO-SHEETS.md](docs/FORMULARIO-SHEETS.md) |
+| `VITE_SHEETS_ENDPOINT` | Não | Sobrescreve a planilha que recebe o formulário `/aplicacaocosmmus`. O endereço padrão fica no código (`DEFAULT_ENDPOINT` em `components/aplicacao/submit.ts`); use a variável apenas para apontar para outra planilha em testes. Veja [docs/FORMULARIO-SHEETS.md](docs/FORMULARIO-SHEETS.md) |
 | `GEMINI_API_KEY` | Não | Chave da API do Gemini |
 
 > `.env.local` **não** vai para o Git. Em produção, cadastre as mesmas variáveis no painel da hospedagem.
@@ -46,7 +46,7 @@ O site sobe em http://localhost:3000
 ## Deploy na Vercel
 
 1. Importe o repositório na Vercel (framework detectado: **Vite**).
-2. Em **Settings → Environment Variables**, cadastre `VITE_SHEETS_ENDPOINT` (e `GEMINI_API_KEY`, se usar) nos ambientes *Production*, *Preview* e *Development*.
+2. Não é preciso cadastrar variáveis para o formulário funcionar: o endereço da planilha vive no código. Cadastre `GEMINI_API_KEY` apenas se for usá-la.
 3. O arquivo [vercel.json](vercel.json) já contém o *rewrite* de SPA necessário para que o link direto `/aplicacaocosmmus` funcione sem erro 404.
 4. Build: `npm run build` · Output: `dist`
 

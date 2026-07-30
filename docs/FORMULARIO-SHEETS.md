@@ -33,21 +33,32 @@ As respostas são enviadas para uma planilha do Google via **Google Apps Script*
 
 ## 4. Ligar o site à planilha
 
-Crie o arquivo `.env.local` na raiz do projeto (ele já é ignorado pelo Git) com:
+O endereço do endpoint fica **no próprio código**, em `DEFAULT_ENDPOINT` no início de
+[`components/aplicacao/submit.ts`](../components/aplicacao/submit.ts). Para trocar de planilha, basta editar essa
+constante e publicar — não é preciso mexer no painel da hospedagem.
 
-```
-VITE_SHEETS_ENDPOINT=https://script.google.com/macros/s/SEU_ID_AQUI/exec
-```
-
-Reinicie o servidor:
-
-```bash
-npm run dev
+```ts
+const DEFAULT_ENDPOINT = 'https://script.google.com/macros/s/SEU_ID_AQUI/exec';
 ```
 
-Enquanto essa variável não existir, o formulário funciona normalmente mas exibe um aviso na última etapa e não grava nada.
+### Por que não fica em variável de ambiente?
 
-> **Importante:** em produção, a mesma variável precisa estar configurada no serviço de hospedagem (Vercel, Netlify, etc.), em *Environment Variables*. Variáveis `VITE_*` são embutidas no build — o endpoint fica visível no código do site, o que é aceitável aqui porque o script só aceita gravação, nunca leitura.
+Variáveis `VITE_*` são **embutidas no bundle durante o build**: o endereço apareceria no JavaScript público de
+qualquer forma. Mantê-lo em `.env` não o tornaria mais reservado — apenas exigiria acesso ao painel da hospedagem
+para cada publicação, e um build feito sem a variável gera um site que **não grava nada**, silenciosamente.
+
+A proteção real é o Apps Script aceitar **somente gravação, nunca leitura**: o endereço não dá acesso ao conteúdo
+da planilha.
+
+### Apontar para outra planilha temporariamente
+
+Para testes ou homologação, crie `.env.local` na raiz do projeto (já ignorado pelo Git):
+
+```
+VITE_SHEETS_ENDPOINT=https://script.google.com/macros/s/OUTRO_ID/exec
+```
+
+A variável tem precedência sobre a constante do código. Reinicie o servidor com `npm run dev` depois de criá-la.
 
 ## 5. Atualizando o script depois
 
