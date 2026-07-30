@@ -11,6 +11,7 @@ interface NavbarProps {
 const navItems: NavItem[] = [
   { label: 'Início', value: 'home' },
   { label: 'Sobre Nós', value: 'about' },
+  { label: 'Equipe', value: 'equipe' },
   { label: 'Áreas de Atuação', value: 'services' },
   { label: 'Metodologia', value: 'methodology' },
   { label: 'Cases', value: 'cases' },
@@ -55,7 +56,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
                 <button
                   key={item.value}
                   onClick={() => handleNav(item.value)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
                     currentView === item.value
                       ? 'text-brand-dark bg-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
                       : 'text-white/70 hover:text-white hover:bg-white/5'

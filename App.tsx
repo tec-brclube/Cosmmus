@@ -18,10 +18,12 @@ import SpaceBackground from './components/SpaceBackground';
 import WhatsAppButton from './components/WhatsAppButton';
 import CtaSection from './components/CtaSection';
 import ApplicationForm from './components/aplicacao/ApplicationForm';
+import Team from './components/Team';
 
 /** Views com URL própria (as demais são navegadas por estado, na raiz). */
 const ROUTES: Partial<Record<ViewState, string>> = {
   aplicacao: '/aplicacaocosmmus',
+  equipe: '/equipe',
 };
 
 const viewFromPath = (pathname: string): ViewState | null => {
@@ -95,6 +97,8 @@ const AppContent: React.FC = () => {
         return <Blog />;
       case 'contact':
         return <Contact />;
+      case 'equipe':
+        return <Team onCtaClick={() => setCurrentView('contact')} />;
       case 'aplicacao':
         return <ApplicationForm />;
       default:
