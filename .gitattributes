@@ -1,0 +1,19 @@
+# Fim de linha padronizado em LF, no repositório e no disco.
+#
+# Sem isto, o Git do Windows (core.autocrlf=true) grava CRLF ao fazer checkout,
+# o que gera avisos no editor e diferenças de linha inteira entre máquinas.
+# Com text=auto o Git detecta arquivos de texto sozinho; binários ficam intactos.
+* text=auto eol=lf
+
+# Arquivos que devem manter CRLF por exigência do Windows
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binários: nunca converter
+*.webp binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.ico  binary
+*.woff binary
+*.woff2 binary
