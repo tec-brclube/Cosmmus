@@ -2,6 +2,7 @@ import type React from 'react';
 import marcosPhoto from '../../IMAGENS/FOTO MARCOS.webp';
 import gustavoPhoto from '../../IMAGENS/Gustavo-Tavares.jpg';
 import andersonPhoto from '../../IMAGENS/Anderson-Soares.webp';
+import sandroPhoto from '../../IMAGENS/SANDRO-COLNAGO.webp';
 
 export interface TeamMember {
   /** Identificador usado na URL: /equipe/<slug> */
@@ -17,6 +18,11 @@ export interface TeamMember {
    * parte do topo, preservando a cabeça.
    */
   photoZoom?: number;
+  /**
+   * Desloca a foto para cima, em % da altura da caixa, quando há espaço vazio
+   * acima da cabeça. Só faz efeito junto com photoZoom. Ex.: 14 sobe 14%.
+   */
+  photoOffsetY?: number;
   /** Uma linha de destaque, exibida no card da listagem. */
   headline: string;
   /** Apresentação curta, exibida no card da listagem. */
@@ -110,17 +116,23 @@ export const teamMembers: TeamMember[] = [
     credentials: [],
   },
   {
-    slug: 'profissional-4',
-    name: '[Nome do quarto profissional]',
-    role: '[Cargo ou função]',
-    headline: '[Uma frase que resume a atuação deste profissional]',
-    summary: '[Apresentação curta, 2 a 3 linhas, exibida no card da listagem.]',
+    slug: 'sandro-colnago',
+    name: 'Sandro Colnago',
+    role: 'Psicólogo',
+    photo: sandroPhoto,
+    // Plano mais aberto e com bastante teto acima da cabeça: aproxima e sobe
+    photoZoom: 1.4,
+    photoOffsetY: 18,
+    headline: 'Risco psicossocial não aparece no balanço. Aparece no afastamento, na rotatividade e no clima.',
+    summary:
+      'Psicólogo. Traz para a Cosmmus Business a leitura do fator humano do trabalho — a dimensão que sustenta ou derruba qualquer plano de gestão.',
     bio: [
-      '[Primeiro parágrafo: trajetória profissional — formação, experiências anteriores e como chegou à Cosmmus Business.]',
-      '[Segundo parágrafo: que frentes conduz na consultoria e como é a sua atuação junto aos clientes.]',
+      'Sandro é o olhar da psicologia dentro da Cosmmus Business: como as pessoas efetivamente vivem a organização, o que adoece e o que sustenta o trabalho no dia a dia.',
+      'Essa leitura raramente aparece nas planilhas, mas sempre aparece nos números — no atestado recorrente, na rotatividade que não cede, na equipe que entrega menos sem que ninguém saiba explicar por quê. A NR-1 tornou obrigatório olhar para esses fatores; a boa gestão já olhava antes.',
+      'Sua atuação conecta o diagnóstico técnico à realidade de quem executa: escuta qualificada, avaliação dos fatores psicossociais do trabalho e planos de ação que a operação consiga sustentar — porque medida que não cabe na rotina não protege ninguém.',
     ],
-    expertise: ['[Área de atuação 1]', '[Área de atuação 2]', '[Área de atuação 3]'],
-    credentials: ['[Formação acadêmica]', '[Pós-graduação ou especialização]'],
+    expertise: ['Riscos Psicossociais', 'Saúde Mental no Trabalho', 'Clima Organizacional'],
+    credentials: [],
   },
 ];
 
@@ -137,11 +149,15 @@ export const getMemberBySlug = (slug: string): TeamMember | undefined =>
 export const getPhotoStyle = (member: TeamMember): React.CSSProperties | undefined => {
   const zoom = member.photoZoom;
   if (!zoom || zoom <= 1) return undefined;
+  // Limita o deslocamento ao espaço que a aproximação criou, para não sobrar vazio
+  const maxOffset = (zoom - 1) * 100;
+  const offset = Math.min(Math.max(member.photoOffsetY ?? 0, 0), maxOffset);
+
   return {
     width: `${zoom * 100}%`,
     height: `${zoom * 100}%`,
     left: `${((1 - zoom) / 2) * 100}%`,
-    top: 0,
+    top: `${-offset}%`,
     // O reset do Tailwind aplica max-width:100% em <img>, o que travaria a
     // largura no tamanho da caixa e deslocaria a foto para a esquerda.
     maxWidth: 'none',
