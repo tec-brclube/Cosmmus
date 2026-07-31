@@ -3,7 +3,7 @@ import marcosPhoto from '../../IMAGENS/FOTO MARCOS.webp';
 import gustavoPhoto from '../../IMAGENS/Gustavo-Tavares.jpg';
 import andersonPhoto from '../../IMAGENS/Anderson-Soares.webp';
 import sandroPhoto from '../../IMAGENS/SANDRO-COLNAGO.webp';
-import pedroPhoto from '../../IMAGENS/PEDRO-BERNARDES.webp';
+import pedroPhoto from '../../IMAGENS/PEDRO-BERNARDES.jpg';
 
 export interface TeamMember {
   /** Identificador usado na URL: /equipe/<slug> */
