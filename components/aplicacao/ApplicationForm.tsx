@@ -654,7 +654,7 @@ const ApplicationForm: React.FC = () => {
                   onClick={() => void performSave('Em preenchimento')}
                   className="flex items-center gap-2 text-xs font-semibold text-paper-danger hover:underline"
                 >
-                  <CloudOff size={14} /> Sem conexão com a planilha — tentar novamente
+                  <CloudOff size={14} /> Sem conexão com a planilha. Tentar novamente
                 </button>
               )}
               {syncState === 'idle' && (
