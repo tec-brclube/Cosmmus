@@ -4,6 +4,7 @@ import gustavoPhoto from '../../IMAGENS/Gustavo-Tavares.jpg';
 import andersonPhoto from '../../IMAGENS/Anderson-Soares.webp';
 import sandroPhoto from '../../IMAGENS/SANDRO-COLNAGO.webp';
 import pedroPhoto from '../../IMAGENS/PEDRO-BERNARDES.jpg';
+import thiagoPhoto from '../../IMAGENS/THIAGO-MORAIS.webp';
 
 export interface TeamMember {
   /** Identificador usado na URL: /equipe/<slug> */
@@ -116,23 +117,22 @@ export const teamMembers: TeamMember[] = [
     credentials: [],
   },
   {
-    slug: 'sandro-colnago',
-    name: 'Sandro Colnago',
-    role: 'Psicólogo · Recursos Humanos',
-    photo: sandroPhoto,
-    // Plano mais aberto e com bastante teto acima da cabeça: aproxima e sobe
-    photoZoom: 1.4,
-    photoOffsetY: 18,
-    headline: 'Gente não é recurso a administrar. É o que decide se a estratégia acontece.',
+    slug: 'thiago-morais',
+    name: 'Thiago Morais',
+    role: 'Designer Gráfico',
+    photo: thiagoPhoto,
+    // Plano de corpo inteiro: aproxima para igualar o rosto aos demais
+    photoZoom: 1.5,
+    headline: 'Marca não é logotipo. É o que o mercado lembra de você quando você não está na sala.',
     summary:
-      'Psicólogo, atua em Recursos Humanos. Traz para a Cosmmus Business a leitura do fator humano do trabalho — a dimensão que sustenta ou derruba qualquer plano de gestão.',
+      'Designer gráfico especialista em branding e posicionamento de marca. Há 15 anos construindo identidade, experiência e valor.',
     bio: [
-      'Psicólogo, Sandro atua na frente de Recursos Humanos da Cosmmus Business — a área que cuida de quem faz a empresa funcionar. É dele o olhar sobre como as pessoas efetivamente vivem a organização: o que motiva, o que desgasta e o que sustenta o trabalho no dia a dia.',
-      'Essa leitura raramente aparece nas planilhas, mas sempre aparece nos números: no atestado recorrente, na rotatividade que não cede, na equipe que entrega menos sem que ninguém saiba explicar por quê. Plano de negócios nenhum se cumpre sem as pessoas que vão executá-lo.',
-      'Sua atuação conecta a gestão de pessoas à realidade de quem executa: escuta qualificada, leitura dos fatores psicossociais do trabalho e medidas que a operação consiga sustentar — porque prática de RH que não cabe na rotina não muda nada.',
+      'Há 15 anos Thiago constrói marcas — e marca, no sentido em que ele trabalha, não é o logotipo: é o que a empresa significa para quem decide comprar dela.',
+      'Especialista em branding e posicionamento, atua sobre três frentes que caminham juntas: a identidade, que dá forma ao negócio; a experiência, que confirma ou desmente essa forma em cada contato; e o valor, que é o preço que o mercado aceita pagar quando as duas primeiras se sustentam.',
+      'Na Cosmmus Business, é quem traduz estratégia em percepção. O plano de negócios define aonde a empresa quer chegar; o posicionamento define se o mercado vai reconhecê-la quando ela chegar lá.',
     ],
-    expertise: ['Recursos Humanos', 'Gestão de Pessoas', 'Riscos Psicossociais', 'Clima Organizacional'],
-    credentials: [],
+    expertise: ['Branding', 'Posicionamento de Marca', 'Identidade Visual', 'Design Gráfico'],
+    credentials: ['15 anos de atuação em design e branding'],
   },
   {
     slug: 'pedro-bernardes',
@@ -151,6 +151,25 @@ export const teamMembers: TeamMember[] = [
     ],
     expertise: ['Direito do Trabalho', 'Direito Cível', 'Conformidade', 'Segurança Jurídica'],
     credentials: ['Professor universitário', 'Mais de 12 anos de advocacia'],
+  },
+  {
+    slug: 'sandro-colnago',
+    name: 'Sandro Colnago',
+    role: 'Psicólogo · Recursos Humanos',
+    photo: sandroPhoto,
+    // Plano mais aberto e com bastante teto acima da cabeça: aproxima e sobe
+    photoZoom: 1.4,
+    photoOffsetY: 18,
+    headline: 'Gente não é recurso a administrar. É o que decide se a estratégia acontece.',
+    summary:
+      'Psicólogo, atua em Recursos Humanos. Traz para a Cosmmus Business a leitura do fator humano do trabalho — a dimensão que sustenta ou derruba qualquer plano de gestão.',
+    bio: [
+      'Psicólogo, Sandro atua na frente de Recursos Humanos da Cosmmus Business — a área que cuida de quem faz a empresa funcionar. É dele o olhar sobre como as pessoas efetivamente vivem a organização: o que motiva, o que desgasta e o que sustenta o trabalho no dia a dia.',
+      'Essa leitura raramente aparece nas planilhas, mas sempre aparece nos números: no atestado recorrente, na rotatividade que não cede, na equipe que entrega menos sem que ninguém saiba explicar por quê. Plano de negócios nenhum se cumpre sem as pessoas que vão executá-lo.',
+      'Sua atuação conecta a gestão de pessoas à realidade de quem executa: escuta qualificada, leitura dos fatores psicossociais do trabalho e medidas que a operação consiga sustentar — porque prática de RH que não cabe na rotina não muda nada.',
+    ],
+    expertise: ['Recursos Humanos', 'Gestão de Pessoas', 'Riscos Psicossociais', 'Clima Organizacional'],
+    credentials: [],
   },
 ];
 
