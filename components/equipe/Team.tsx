@@ -24,7 +24,7 @@ const Team: React.FC<TeamProps> = ({ onViewMember, onCtaClick }) => {
             Método é gente. <br />
             <span className="text-brand-purple">Conheça quem executa.</span>
           </h1>
-          <p className="text-lg md:text-xl text-white/70 font-light leading-relaxed">
+          <p className="text-lg md:text-xl text-white/85 leading-relaxed">
             Uma equipe multidisciplinar que une finanças, marketing, operação e gestão de pessoas. Não terceirizamos o
             que importa: quem desenha a estratégia é quem senta com você para executá-la.
           </p>
@@ -79,14 +79,14 @@ const Team: React.FC<TeamProps> = ({ onViewMember, onCtaClick }) => {
                   {member.role}
                 </p>
 
-                <p className="text-white/70 font-light leading-relaxed text-sm flex-grow">{member.summary}</p>
+                <p className="text-white/85 leading-relaxed text-[15px] flex-grow">{member.summary}</p>
 
                 {member.expertise.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-6">
                     {member.expertise.slice(0, 3).map((item) => (
                       <span
                         key={item}
-                        className="text-[10px] font-medium uppercase tracking-wider text-white/60 border border-white/10 bg-white/[0.03] rounded-full px-3 py-1.5"
+                        className="text-[10px] font-semibold uppercase tracking-wider text-white/75 border border-white/15 bg-white/[0.05] rounded-full px-3 py-1.5"
                       >
                         {item}
                       </span>
@@ -108,7 +108,7 @@ const Team: React.FC<TeamProps> = ({ onViewMember, onCtaClick }) => {
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-tight mb-6">
             Quer conversar com <span className="gradient-text">quem faz</span>?
           </h2>
-          <p className="text-white/70 text-lg font-light leading-relaxed max-w-2xl mx-auto mb-10">
+          <p className="text-white/85 text-lg leading-relaxed max-w-2xl mx-auto mb-10">
             Agende uma reunião estratégica e conheça de perto a metodologia que sustenta cada projeto da Cosmmus
             Business.
           </p>

@@ -19,7 +19,7 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
         <h1 className="text-3xl md:text-4xl font-black tracking-tighter text-white mb-6">
           Profissional não encontrado
         </h1>
-        <p className="text-white/70 font-light leading-relaxed mb-10">
+        <p className="text-white/85 leading-relaxed mb-10">
           O endereço acessado não corresponde a nenhum profissional da equipe.
         </p>
         <button
@@ -48,7 +48,7 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
         <button
           type="button"
           onClick={onBack}
-          className="mt-12 mb-10 inline-flex items-center gap-2 text-sm text-white/60 hover:text-brand-cyan transition-colors group"
+          className="mt-12 mb-10 inline-flex items-center gap-2 text-sm font-medium text-white/75 hover:text-brand-cyan transition-colors group"
         >
           <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
           Voltar para a equipe
@@ -119,7 +119,7 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
               {member.headline}
             </p>
 
-            <div className="space-y-6 text-lg text-white/70 font-light leading-relaxed mb-12">
+            <div className="space-y-6 text-lg text-white/85 leading-relaxed mb-12">
               {member.bio.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}
@@ -128,12 +128,12 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
             {/* Áreas de atuação */}
             {member.expertise.length > 0 && (
               <div className="mb-12">
-                <h2 className="text-[11px] font-bold text-white/40 uppercase tracking-widest mb-5">Áreas de atuação</h2>
+                <h2 className="text-[11px] font-bold text-white/60 uppercase tracking-widest mb-5">Áreas de atuação</h2>
                 <div className="flex flex-wrap gap-3">
                   {member.expertise.map((item) => (
                     <span
                       key={item}
-                      className="text-sm font-medium text-white/80 border border-white/10 bg-white/[0.03] rounded-full px-5 py-2.5"
+                      className="text-sm font-medium text-white/90 border border-white/15 bg-white/[0.05] rounded-full px-5 py-2.5"
                     >
                       {item}
                     </span>
@@ -145,12 +145,12 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
             {/* Formação */}
             {member.credentials.length > 0 && (
               <div className="rounded-3xl border border-white/10 bg-brand-surface/40 backdrop-blur-xl p-8">
-                <h2 className="text-[11px] font-bold text-white/40 uppercase tracking-widest mb-6">
+                <h2 className="text-[11px] font-bold text-white/60 uppercase tracking-widest mb-6">
                   Formação e reconhecimentos
                 </h2>
                 <ul className="space-y-4">
                   {member.credentials.map((item) => (
-                    <li key={item} className="flex items-start gap-4 text-white/80 font-light">
+                    <li key={item} className="flex items-start gap-4 text-white/90">
                       <GraduationCap size={20} className="text-brand-purple flex-shrink-0 mt-0.5" strokeWidth={1.5} />
                       {item}
                     </li>
@@ -185,7 +185,7 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
                   <p className="text-white font-bold leading-tight truncate group-hover:text-brand-cyan transition-colors">
                     {other.name}
                   </p>
-                  <p className="text-white/50 text-[10px] uppercase tracking-widest font-bold mt-1 truncate">
+                  <p className="text-white/65 text-[10px] uppercase tracking-widest font-bold mt-1 truncate">
                     {other.role}
                   </p>
                 </div>
@@ -199,7 +199,7 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-white leading-tight mb-6">
             Vamos construir <span className="gradient-text">o próximo capítulo</span>?
           </h2>
-          <p className="text-white/70 text-lg font-light leading-relaxed max-w-2xl mx-auto mb-10">
+          <p className="text-white/85 text-lg leading-relaxed max-w-2xl mx-auto mb-10">
             Agende uma reunião estratégica e conheça de perto a metodologia que sustenta cada projeto da Cosmmus
             Business.
           </p>

@@ -118,20 +118,20 @@ export const teamMembers: TeamMember[] = [
   {
     slug: 'sandro-colnago',
     name: 'Sandro Colnago',
-    role: 'Psicólogo',
+    role: 'Psicólogo · Recursos Humanos',
     photo: sandroPhoto,
     // Plano mais aberto e com bastante teto acima da cabeça: aproxima e sobe
     photoZoom: 1.4,
     photoOffsetY: 18,
-    headline: 'Risco psicossocial não aparece no balanço. Aparece no afastamento, na rotatividade e no clima.',
+    headline: 'Gente não é recurso a administrar. É o que decide se a estratégia acontece.',
     summary:
-      'Psicólogo. Traz para a Cosmmus Business a leitura do fator humano do trabalho — a dimensão que sustenta ou derruba qualquer plano de gestão.',
+      'Psicólogo, atua em Recursos Humanos. Traz para a Cosmmus Business a leitura do fator humano do trabalho — a dimensão que sustenta ou derruba qualquer plano de gestão.',
     bio: [
-      'Sandro é o olhar da psicologia dentro da Cosmmus Business: como as pessoas efetivamente vivem a organização, o que adoece e o que sustenta o trabalho no dia a dia.',
-      'Essa leitura raramente aparece nas planilhas, mas sempre aparece nos números — no atestado recorrente, na rotatividade que não cede, na equipe que entrega menos sem que ninguém saiba explicar por quê. A NR-1 tornou obrigatório olhar para esses fatores; a boa gestão já olhava antes.',
-      'Sua atuação conecta o diagnóstico técnico à realidade de quem executa: escuta qualificada, avaliação dos fatores psicossociais do trabalho e planos de ação que a operação consiga sustentar — porque medida que não cabe na rotina não protege ninguém.',
+      'Psicólogo, Sandro atua na frente de Recursos Humanos da Cosmmus Business — a área que cuida de quem faz a empresa funcionar. É dele o olhar sobre como as pessoas efetivamente vivem a organização: o que motiva, o que desgasta e o que sustenta o trabalho no dia a dia.',
+      'Essa leitura raramente aparece nas planilhas, mas sempre aparece nos números: no atestado recorrente, na rotatividade que não cede, na equipe que entrega menos sem que ninguém saiba explicar por quê. Plano de negócios nenhum se cumpre sem as pessoas que vão executá-lo.',
+      'Sua atuação conecta a gestão de pessoas à realidade de quem executa: escuta qualificada, leitura dos fatores psicossociais do trabalho e medidas que a operação consiga sustentar — porque prática de RH que não cabe na rotina não muda nada.',
     ],
-    expertise: ['Riscos Psicossociais', 'Saúde Mental no Trabalho', 'Clima Organizacional'],
+    expertise: ['Recursos Humanos', 'Gestão de Pessoas', 'Riscos Psicossociais', 'Clima Organizacional'],
     credentials: [],
   },
 ];
