@@ -25,7 +25,7 @@ export interface TeamMember {
   bio: string[];
   /** Áreas de atuação exibidas como etiquetas. */
   expertise: string[];
-  /** Formação acadêmica e certificações, exibidas na página individual. */
+  /** Formação, cargos e reconhecimentos, exibidos na página individual. */
   credentials: string[];
   linkedin?: string;
   email?: string;
@@ -53,18 +53,27 @@ export const teamMembers: TeamMember[] = [
   {
     slug: 'marcos-antonio',
     name: 'Marcos Antônio da Silva e Silva',
-    role: 'Fundador & CEO',
+    role: 'Fundador & Consultor',
     photo: marcosPhoto,
-    headline: '[Uma frase que resume a atuação de Marcos Antônio]',
+    headline: 'Dirigir a própria operação ensina o que nenhum relatório ensina sobre a operação dos outros.',
     summary:
-      '[Apresentação curta de Marcos Antônio, 2 a 3 linhas, exibida no card da listagem.]',
+      'Fundador e CEO da BR Clube de Benefícios e fundador da Cosmmus Business. Há 12 anos à frente do programa Crisálida, une gestão de negócios, cooperativismo e economia solidária — com reconhecimento nacional e internacional.',
     bio: [
-      '[Primeiro parágrafo: trajetória profissional de Marcos Antônio — onde atuou, o que construiu e o que o levou a fundar a Cosmmus Business.]',
-      '[Segundo parágrafo: como ele atua hoje dentro da consultoria, que frentes lidera e qual é a sua abordagem com os clientes.]',
-      '[Terceiro parágrafo (opcional): visão, propósito ou uma marca pessoal de trabalho.]',
+      'Marcos Antônio é fundador da BR Clube de Benefícios, onde atua como CEO e presidente, e fundador da Cosmmus Business, consultoria que atende empresas de diversos segmentos. Sua atuação reúne duas perspectivas que raramente se encontram na mesa de consultoria: a de quem dirige a própria operação e a de quem estrutura a operação dos outros.',
+      'Há 12 anos coordena o programa Crisálida, voltado ao combate à extrema pobreza e à redução de vulnerabilidades sociais. Sustentar um programa por mais de uma década, com reconhecimento nacional e internacional, é um exercício de gestão em estado puro: diagnóstico, método, indicadores e continuidade — exatamente os pilares que sustentam um plano de negócios.',
+      'Estudante de Economia, foi presidente do Conselho Regional de Economia Acadêmico de Goiás e da Federação Nacional de Estudantes de Economia, além de integrar o Fórum Nacional pela Redução das Desigualdades Sociais. Como palestrante e instrutor de cooperativismo, atua em todo o país — experiência que sustenta diretamente a frente Cosmmus Coop, dedicada a cooperativas.',
+      'O trabalho rendeu reconhecimentos: o prêmio de cultura e extensão da Universidade Federal de Goiás (2016), pelo projeto "Do Individualismo no Lixão à Solidariedade na Cooperativa", e a Comenda Honestino Guimarães (2017). Foi convidado pelo Papa Francisco a apresentar as metodologias do Crisálida no Encontro Economia de Francisco, ocasião em que lhe entregou um exemplar de "O Dia que a Terra Voltou a Sorrir", livro infantil sobre economia solidária e sustentabilidade que escreveu com a jornalista Paula Fernandes.',
+      'Vereador em Goiânia e comentarista semanal em emissoras de rádio da capital, leva ao debate público a mesma leitura que aplica às empresas: sustentabilidade e resultado não são caminhos opostos.',
     ],
-    expertise: ['[Área de atuação 1]', '[Área de atuação 2]', '[Área de atuação 3]'],
-    credentials: ['[Formação acadêmica]', '[Pós-graduação ou especialização]', '[Certificação relevante]'],
+    expertise: ['Gestão de Negócios', 'Cooperativismo', 'Economia Solidária', 'Sustentabilidade'],
+    credentials: [
+      'Estudante de Economia',
+      'Comenda Honestino Guimarães (2017)',
+      'Prêmio de Cultura e Extensão — Universidade Federal de Goiás (2016)',
+      'Ex-presidente da Federação Nacional de Estudantes de Economia',
+      'Ex-presidente do Conselho Regional de Economia Acadêmico de Goiás',
+      'Coautor do livro infantil "O Dia que a Terra Voltou a Sorrir"',
+    ],
   },
   {
     slug: 'gustavo-tavares',

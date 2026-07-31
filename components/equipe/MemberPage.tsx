@@ -146,7 +146,7 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
             {member.credentials.length > 0 && (
               <div className="rounded-3xl border border-white/10 bg-brand-surface/40 backdrop-blur-xl p-8">
                 <h2 className="text-[11px] font-bold text-white/40 uppercase tracking-widest mb-6">
-                  Formação e certificações
+                  Formação e reconhecimentos
                 </h2>
                 <ul className="space-y-4">
                   {member.credentials.map((item) => (
