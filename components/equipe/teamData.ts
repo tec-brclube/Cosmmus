@@ -3,6 +3,7 @@ import marcosPhoto from '../../IMAGENS/FOTO MARCOS.webp';
 import gustavoPhoto from '../../IMAGENS/Gustavo-Tavares.jpg';
 import andersonPhoto from '../../IMAGENS/Anderson-Soares.webp';
 import sandroPhoto from '../../IMAGENS/SANDRO-COLNAGO.webp';
+import pedroPhoto from '../../IMAGENS/PEDRO-BERNARDES.webp';
 
 export interface TeamMember {
   /** Identificador usado na URL: /equipe/<slug> */
@@ -67,13 +68,12 @@ export const teamMembers: TeamMember[] = [
     bio: [
       'Marcos Antônio é fundador da BR Clube de Benefícios, onde atua como CEO e presidente, e fundador da Cosmmus Business, consultoria que atende empresas de diversos segmentos. Sua atuação reúne duas perspectivas que raramente se encontram na mesa de consultoria: a de quem dirige a própria operação e a de quem estrutura a operação dos outros.',
       'Há 12 anos coordena o programa Crisálida, voltado ao combate à extrema pobreza e à redução de vulnerabilidades sociais. Sustentar um programa por mais de uma década, com reconhecimento nacional e internacional, é um exercício de gestão em estado puro: diagnóstico, método, indicadores e continuidade — exatamente os pilares que sustentam um plano de negócios.',
-      'Estudante de Economia, foi presidente do Conselho Regional de Economia Acadêmico de Goiás e da Federação Nacional de Estudantes de Economia, além de integrar o Fórum Nacional pela Redução das Desigualdades Sociais. Como palestrante e instrutor de cooperativismo, atua em todo o país — experiência que sustenta diretamente a frente Cosmmus Coop, dedicada a cooperativas.',
+      'Foi presidente do Conselho Regional de Economia Acadêmico de Goiás e da Federação Nacional de Estudantes de Economia, além de integrar o Fórum Nacional pela Redução das Desigualdades Sociais. Como palestrante e instrutor de cooperativismo, atua em todo o país — experiência que sustenta diretamente a frente Cosmmus Coop, dedicada a cooperativas.',
       'O trabalho rendeu reconhecimentos: o prêmio de cultura e extensão da Universidade Federal de Goiás (2016), pelo projeto "Do Individualismo no Lixão à Solidariedade na Cooperativa", e a Comenda Honestino Guimarães (2017). Foi convidado pelo Papa Francisco a apresentar as metodologias do Crisálida no Encontro Economia de Francisco, ocasião em que lhe entregou um exemplar de "O Dia que a Terra Voltou a Sorrir", livro infantil sobre economia solidária e sustentabilidade que escreveu com a jornalista Paula Fernandes.',
       'Vereador em Goiânia e comentarista semanal em emissoras de rádio da capital, leva ao debate público a mesma leitura que aplica às empresas: sustentabilidade e resultado não são caminhos opostos.',
     ],
     expertise: ['Gestão de Negócios', 'Cooperativismo', 'Economia Solidária', 'Sustentabilidade'],
     credentials: [
-      'Estudante de Economia',
       'Comenda Honestino Guimarães (2017)',
       'Prêmio de Cultura e Extensão — Universidade Federal de Goiás (2016)',
       'Ex-presidente da Federação Nacional de Estudantes de Economia',
@@ -133,6 +133,24 @@ export const teamMembers: TeamMember[] = [
     ],
     expertise: ['Recursos Humanos', 'Gestão de Pessoas', 'Riscos Psicossociais', 'Clima Organizacional'],
     credentials: [],
+  },
+  {
+    slug: 'pedro-bernardes',
+    name: 'Pedro Bernardes',
+    role: 'Advogado · Professor Universitário',
+    photo: pedroPhoto,
+    // Plano de corpo inteiro, como o do Anderson: aproxima para igualar o rosto
+    photoZoom: 1.5,
+    headline: 'Conformidade não é custo. É o que impede o passivo que ninguém viu chegando.',
+    summary:
+      'Advogado há mais de 12 anos, especialista em Direito do Trabalho e Cível, e professor universitário. Atua para trazer segurança jurídica e conformidade às empresas.',
+    bio: [
+      'Advogado há mais de 12 anos, Pedro é especialista em Direito do Trabalho e Cível — justamente as duas frentes em que a empresa costuma descobrir, tarde, que uma decisão de gestão tinha consequência jurídica.',
+      'Sua atuação na Cosmmus Business é trazer segurança jurídica e conformidade ao negócio: contratos, rotinas e práticas que sustentam o crescimento sem acumular passivo. A conta de uma prática irregular raramente chega no mês em que ela acontece — chega anos depois, corrigida e com juros.',
+      'Professor universitário, traz para a consultoria o hábito de explicar. Não basta apontar o risco: quem decide precisa entender de onde ele vem, para que a correção sobreviva à reunião em que foi combinada.',
+    ],
+    expertise: ['Direito do Trabalho', 'Direito Cível', 'Conformidade', 'Segurança Jurídica'],
+    credentials: ['Professor universitário', 'Mais de 12 anos de advocacia'],
   },
 ];
 

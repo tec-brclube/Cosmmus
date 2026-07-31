@@ -164,7 +164,7 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
         {/* Demais profissionais */}
         <div className="border-t border-white/10 py-20">
           <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-white mb-10">Conheça o restante do time</h2>
-          <div className="grid sm:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {others.map((other) => (
               <button
                 key={other.slug}
