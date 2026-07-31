@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowLeft, ArrowRight, GraduationCap, Linkedin, Mail } from 'lucide-react';
-import { getInitials, getMemberBySlug, teamMembers } from './teamData';
+import { getInitials, getMemberBySlug, getPhotoStyle, teamMembers } from './teamData';
 
 interface MemberPageProps {
   slug: string;
@@ -61,7 +61,12 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
             <div className="lg:sticky lg:top-32">
               <div className="aspect-[3/4] rounded-3xl overflow-hidden relative border border-white/10 shadow-2xl shadow-brand-purple/20 bg-brand-surface/40">
                 {member.photo ? (
-                  <img src={member.photo} alt={member.name} className="w-full h-full object-cover object-top" />
+                  <img
+                    src={member.photo}
+                    alt={member.name}
+                    style={getPhotoStyle(member)}
+                    className="absolute inset-0 w-full h-full object-cover object-top"
+                  />
                 ) : (
                   <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-brand-navy via-brand-surface to-brand-dark">
                     <div className="w-32 h-32 rounded-full gradient-bg flex items-center justify-center mb-5 opacity-90">

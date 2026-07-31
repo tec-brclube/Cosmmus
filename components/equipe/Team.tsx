@@ -1,6 +1,6 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
-import { getInitials, teamMembers } from './teamData';
+import { getInitials, getPhotoStyle, teamMembers } from './teamData';
 
 interface TeamProps {
   onViewMember: (slug: string) => void;
@@ -44,10 +44,11 @@ const Team: React.FC<TeamProps> = ({ onViewMember, onCtaClick }) => {
                   <img
                     src={member.photo}
                     alt={member.name}
-                    className="w-full h-full object-cover object-top sm:absolute sm:inset-0 transform group-hover:scale-[1.03] transition-transform duration-700"
+                    style={getPhotoStyle(member)}
+                    className="absolute inset-0 w-full h-full object-cover object-top transform group-hover:scale-[1.03] transition-transform duration-700"
                   />
                 ) : (
-                  <div className="w-full h-full sm:absolute sm:inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-brand-navy via-brand-surface to-brand-dark">
+                  <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-brand-navy via-brand-surface to-brand-dark">
                     <div className="w-24 h-24 rounded-full gradient-bg flex items-center justify-center mb-4 opacity-90 group-hover:scale-105 transition-transform duration-500">
                       <span className="text-2xl font-black text-white tracking-tight">{getInitials(member.name)}</span>
                     </div>
