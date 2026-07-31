@@ -16,7 +16,7 @@ const Contact: React.FC = () => {
               Pronto para o <br/>
               <span className="text-brand-pink">próximo nível?</span>
             </h1>
-            <p className="text-white/70 text-xl mb-12 font-light leading-relaxed">
+            <p className="text-white/85 text-xl mb-12 font-light leading-relaxed">
               A transformação começa com uma decisão. Se você está cansado de resultados medianos e quer escalar seu negócio com inteligência, fale conosco.
             </p>
 
@@ -24,10 +24,10 @@ const Contact: React.FC = () => {
               <div>
                 <h3 className="text-white font-bold text-lg mb-2">Contato Direto</h3>
                 <div className="flex flex-col items-center">
-                  <a href="mailto:contato@cosmmus.com" className="text-white/70 hover:text-brand-cyan transition-colors flex items-center gap-2">
+                  <a href="mailto:contato@cosmmus.com" className="text-white/85 hover:text-brand-cyan transition-colors flex items-center gap-2">
                      contato@cosmmus.com
                   </a>
-                  <a href="tel:+5562999546265" className="text-white/70 hover:text-brand-cyan transition-colors flex items-center gap-2">
+                  <a href="tel:+5562999546265" className="text-white/85 hover:text-brand-cyan transition-colors flex items-center gap-2">
                      (62) 99954-6265
                   </a>
                 </div>
@@ -35,7 +35,7 @@ const Contact: React.FC = () => {
 
               <div>
                 <h3 className="text-white font-bold text-lg mb-2">Base de Operações</h3>
-                <p className="text-white/70">Goiânia-GO</p>
+                <p className="text-white/85">Goiânia-GO</p>
               </div>
             </div>
           </div>

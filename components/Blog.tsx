@@ -12,7 +12,7 @@ const Blog: React.FC = () => {
         
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold mb-6">Conteúdos e Insights</h1>
-          <p className="text-white/70">Mantenha-se atualizado com o Boletim Cosmmus.</p>
+          <p className="text-white/85">Mantenha-se atualizado com o Boletim Cosmmus.</p>
         </div>
 
         {/* Resource Types */}
@@ -21,21 +21,21 @@ const Blog: React.FC = () => {
                 < BookOpen className="text-brand-cyan w-8 h-8" />
                 <div>
                     <h3 className="font-bold text-white">Blog & E-books</h3>
-                    <p className="text-sm text-white/70">Artigos técnicos e guias.</p>
+                    <p className="text-sm text-white/85">Artigos técnicos e guias.</p>
                 </div>
             </div>
             <div className="bg-brand-surface p-6 rounded-xl border border-white/5 flex flex-col items-center text-center gap-4">
                 <Mic className="text-brand-pink w-8 h-8" />
                 <div>
                     <h3 className="font-bold text-white">Podcasts</h3>
-                    <p className="text-sm text-white/70">Conversas com especialistas.</p>
+                    <p className="text-sm text-white/85">Conversas com especialistas.</p>
                 </div>
             </div>
             <div className="bg-brand-surface p-6 rounded-xl border border-white/5 flex flex-col items-center text-center gap-4">
                 <Mail className="text-purple-400 w-8 h-8" />
                 <div>
                     <h3 className="font-bold text-white">Newsletter</h3>
-                    <p className="text-sm text-white/70">Assine o Boletim Cosmmus.</p>
+                    <p className="text-sm text-white/85">Assine o Boletim Cosmmus.</p>
                 </div>
             </div>
         </div>
@@ -50,10 +50,10 @@ const Blog: React.FC = () => {
             >
                 <div className="flex justify-between items-center mb-4 w-full">
                     <span className="text-brand-cyan text-xs font-bold uppercase bg-brand-cyan/10 px-2 py-1 rounded">{post.category}</span>
-                    <span className="text-white/50 text-xs">{post.date}</span>
+                    <span className="text-white/70 text-xs">{post.date}</span>
                 </div>
                 <h3 className="text-xl font-bold text-white mb-2">{post.title}</h3>
-                <p className="text-white/70 text-sm mb-4">{post.excerpt}</p>
+                <p className="text-white/85 text-sm mb-4">{post.excerpt}</p>
                 <button className="text-brand-pink text-sm font-semibold hover:underline">Ler mais</button>
             </article>
           ))}

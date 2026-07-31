@@ -15,7 +15,7 @@ const About: React.FC = () => {
                     Não somos consultores.<br/>
                     Somos arquitetos de <span className="text-brand-purple">legado</span>.
                 </h1>
-                <div className="space-y-6 text-lg text-white/70 font-light leading-relaxed">
+                <div className="space-y-6 text-lg text-white/85 leading-relaxed">
                     <p>
                         O mundo dos negócios está cheio de fórmulas prontas e relatórios que acumulam poeira. 
                         A COSMMUS nasceu para desafiar essa inércia.
@@ -60,7 +60,7 @@ const About: React.FC = () => {
                     <div key={idx} className="group">
                         <val.icon className="text-brand-pink w-10 h-10 mb-6 opacity-80 group-hover:opacity-100 transition-opacity" strokeWidth={1.5} />
                         <h3 className="text-lg font-bold text-white mb-3 tracking-tight">{val.title}</h3>
-                        <p className="text-white/70 text-sm leading-relaxed font-light">{val.desc}</p>
+                        <p className="text-white/85 text-sm leading-relaxed">{val.desc}</p>
                     </div>
                 ))}
             </div>

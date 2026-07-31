@@ -69,14 +69,14 @@ const Services: React.FC<ServicesProps> = ({ limit, onViewAll, onViewService }) 
                   {service.title}
                 </h4>
                 
-                <p className="text-white/70 text-sm leading-snug mb-4 font-light">
+                <p className="text-white/85 text-sm leading-snug mb-4">
                   {service.description}
                 </p>
                 
                 <div className="border-t border-white/5 pt-4 w-full flex-grow">
                   <ul className="space-y-2 flex flex-col items-center">
                       {service.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-center text-xs text-white/50 group-hover:text-white/90 transition-colors text-center">
+                      <li key={idx} className="flex items-center text-xs text-white/70 group-hover:text-white/90 transition-colors text-center">
                           <span className="w-1 h-1 rounded-full bg-brand-pink mr-2 flex-shrink-0"></span>
                           {feature}
                       </li>

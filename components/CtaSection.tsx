@@ -18,7 +18,7 @@ const CtaSection: React.FC<CtaSectionProps> = ({ onCtaClick }) => {
           Pronto para <span className="gradient-text">provocar<br />o futuro?</span>
         </h2>
         
-        <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
+        <p className="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto font-light leading-relaxed">
           Não apenas desenhamos processos; forjamos legados.<br className="hidden md:block" />
           Saia da zona de sobrevivência e projete sua marca para o topo da cadeia competitiva agora.
         </p>

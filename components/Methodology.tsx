@@ -83,7 +83,7 @@ const Methodology: React.FC<MethodologyProps> = ({ preview }) => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-white/70 max-w-3xl mx-auto text-lg md:text-xl font-light"
+            className="text-white/85 max-w-3xl mx-auto text-lg md:text-xl font-light"
           >
             Não entregamos apenas planos, desenhamos a estrutura que sustenta a sua expansão.
           </motion.p>
@@ -93,7 +93,7 @@ const Methodology: React.FC<MethodologyProps> = ({ preview }) => {
         <div className="mb-32 relative">
           <div className="text-center mb-16">
             <h4 className="text-2xl md:text-3xl font-bold text-white mb-2 font-sans">1. A Linha de Tração</h4>
-            <p className="text-white/50 font-sans text-sm">As Etapas do Circuito</p>
+            <p className="text-white/70 font-sans text-sm">As Etapas do Circuito</p>
           </div>
 
           <div ref={lineRef} className="relative max-w-4xl mx-auto">
@@ -125,7 +125,7 @@ const Methodology: React.FC<MethodologyProps> = ({ preview }) => {
                           <span className="font-mono text-brand-cyan text-lg font-bold">{step.num}</span>
                           <h5 className="text-xl md:text-2xl font-bold text-white">{step.title}</h5>
                         </div>
-                        <p className="text-white/60 leading-relaxed">{step.desc}</p>
+                        <p className="text-white/75 leading-relaxed">{step.desc}</p>
                       </div>
                     </div>
 
@@ -171,7 +171,7 @@ const Methodology: React.FC<MethodologyProps> = ({ preview }) => {
 
           <div className="text-center mb-16 relative z-10">
             <h4 className="text-2xl md:text-3xl font-bold text-white mb-2 font-sans">2. O Núcleo do Ecossistema</h4>
-            <p className="text-white/50 font-sans text-sm">Os 5 Eixos Estratégicos</p>
+            <p className="text-white/70 font-sans text-sm">Os 5 Eixos Estratégicos</p>
           </div>
 
           <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24 relative z-10">
@@ -316,13 +316,13 @@ const Methodology: React.FC<MethodologyProps> = ({ preview }) => {
                         {axes.find(a => a.id === activeAxis)?.title}
                       </h5>
                     </div>
-                    <p className="text-white/70 text-lg leading-relaxed font-sans">
+                    <p className="text-white/85 text-lg leading-relaxed font-sans">
                       {axes.find(a => a.id === activeAxis)?.desc}
                     </p>
                   </motion.div>
                 ) : (
                   <div className="relative z-10 text-center opacity-50">
-                    <ActivitySquare className="w-12 h-12 mx-auto mb-4 text-white/30" />
+                    <ActivitySquare className="w-12 h-12 mx-auto mb-4 text-white/50" />
                     <p className="font-sans text-sm uppercase tracking-widest">Inicie a varredura<br/>(Passe o mouse sobre os eixos)</p>
                   </div>
                 )}
@@ -335,7 +335,7 @@ const Methodology: React.FC<MethodologyProps> = ({ preview }) => {
         <div>
           <div className="text-center mb-16">
             <h4 className="text-2xl md:text-3xl font-bold text-white mb-2 font-sans">3. A Ciência por Trás do Propósito</h4>
-            <p className="text-white/50 font-sans text-sm">Especificações de Sistema</p>
+            <p className="text-white/70 font-sans text-sm">Especificações de Sistema</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
@@ -356,7 +356,7 @@ const Methodology: React.FC<MethodologyProps> = ({ preview }) => {
                   <CheckCircle2 className="w-6 h-6 text-brand-cyan flex-shrink-0 mt-1" />
                   <div>
                     <h5 className="text-lg font-bold text-white mb-2 font-sans">{diff.title}</h5>
-                    <p className="text-white/60 text-sm leading-relaxed font-sans">{diff.desc}</p>
+                    <p className="text-white/75 text-sm leading-relaxed font-sans">{diff.desc}</p>
                   </div>
                 </div>
               </motion.div>

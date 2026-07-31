@@ -64,7 +64,7 @@ const ServicePage: React.FC<ServicePageProps> = ({ serviceId, onBack }) => {
             {service.title}
           </h1>
 
-          <p className="text-xl text-white/70 leading-relaxed mb-12 font-light max-w-2xl">
+          <p className="text-xl text-white/85 leading-relaxed mb-12 font-light max-w-2xl">
             {service.description}
           </p>
 
@@ -73,7 +73,7 @@ const ServicePage: React.FC<ServicePageProps> = ({ serviceId, onBack }) => {
               {service.subServices.map((sub, idx) => (
                 <div key={idx} className="bg-brand-surface/40 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-xl text-center flex flex-col items-center">
                   <h3 className="text-2xl font-bold text-white mb-4">{sub.title}</h3>
-                  <p className="text-white/70 mb-6 max-w-xl">{sub.description}</p>
+                  <p className="text-white/85 mb-6 max-w-xl">{sub.description}</p>
                   
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 w-full">
                     {sub.features.map((feature, fIdx) => (

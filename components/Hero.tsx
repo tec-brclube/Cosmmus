@@ -37,7 +37,7 @@ const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           </h1>
           
           {/* Subheadline */}
-          <p className="text-lg md:text-2xl text-white/70 max-w-3xl leading-relaxed mb-12 font-light">
+          <p className="text-lg md:text-2xl text-white/85 max-w-3xl leading-relaxed mb-12 font-light">
             {hero.subtitle}
           </p>
           
@@ -68,15 +68,15 @@ const Hero: React.FC<HeroProps> = ({ onCtaClick }) => {
           <div className="mt-24 border-t border-white/5 pt-8 flex flex-col md:flex-row gap-8 md:gap-16 text-center md:text-left opacity-60 hover:opacity-100 transition-opacity">
              <div>
                 <p className="text-2xl font-bold text-white">{hero.stat1Value}</p>
-                <p className="text-xs uppercase tracking-widest text-white/50">{hero.stat1Label}</p>
+                <p className="text-xs uppercase tracking-widest text-white/70">{hero.stat1Label}</p>
              </div>
              <div>
                 <p className="text-2xl font-bold text-white">{hero.stat2Value}</p>
-                <p className="text-xs uppercase tracking-widest text-white/50">{hero.stat2Label}</p>
+                <p className="text-xs uppercase tracking-widest text-white/70">{hero.stat2Label}</p>
              </div>
              <div>
                 <p className="text-2xl font-bold text-white">{hero.stat3Value}</p>
-                <p className="text-xs uppercase tracking-widest text-white/50">{hero.stat3Label}</p>
+                <p className="text-xs uppercase tracking-widest text-white/70">{hero.stat3Label}</p>
              </div>
           </div>
 
