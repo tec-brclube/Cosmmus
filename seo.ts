@@ -16,7 +16,7 @@ import { getMemberBySlug } from './components/equipe/teamData';
  */
 
 /** Endereço público do site — usado em canonical, Open Graph e sitemap. */
-export const SITE_URL = 'https://site.cosmmus.com';
+export const SITE_URL = 'https://www.cosmmus.com';
 
 export const SITE_NAME = 'COSMMUS Business';
 
