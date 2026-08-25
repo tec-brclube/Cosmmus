@@ -2,12 +2,23 @@ import React from 'react';
 import { Facebook, Instagram, Linkedin, ShieldCheck } from 'lucide-react';
 import { ViewState } from '../types';
 import { Logo } from './Logo';
+import { pathFromView, isPlainLeftClick } from '../routes';
 
 interface FooterProps {
   onViewChange: (view: ViewState) => void;
 }
 
 const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
+  /**
+   * Links do rodapé são endereços reais, para que o buscador consiga segui-los;
+   * o clique comum navega pela própria SPA, sem recarregar a página.
+   */
+  const handleNav = (event: React.MouseEvent<HTMLAnchorElement>, view: ViewState) => {
+    if (!isPlainLeftClick(event)) return;
+    event.preventDefault();
+    onViewChange(view);
+  };
+
   return (
     <footer className="bg-transparent border-t border-white/10 pt-20 pb-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,10 +50,10 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
             <div className="text-left">
               <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">A Empresa</h4>
               <ul className="space-y-4 text-sm text-white/85">
-                <li><button onClick={() => onViewChange('about')} className="hover:text-brand-cyan transition-colors">Sobre Nós</button></li>
-                <li><button onClick={() => onViewChange('about')} className="hover:text-brand-cyan transition-colors">Manifesto</button></li>
-                <li><button onClick={() => onViewChange('cases')} className="hover:text-brand-cyan transition-colors">Cases</button></li>
-                <li><button onClick={() => onViewChange('contact')} className="hover:text-brand-cyan transition-colors">Trabalhe Conosco</button></li>
+                <li><a href={pathFromView('about', null)} onClick={(event) => handleNav(event, 'about')} className="hover:text-brand-cyan transition-colors">Sobre Nós</a></li>
+                <li><a href={pathFromView('about', null)} onClick={(event) => handleNav(event, 'about')} className="hover:text-brand-cyan transition-colors">Manifesto</a></li>
+                <li><a href={pathFromView('cases', null)} onClick={(event) => handleNav(event, 'cases')} className="hover:text-brand-cyan transition-colors">Cases</a></li>
+                <li><a href={pathFromView('contact', null)} onClick={(event) => handleNav(event, 'contact')} className="hover:text-brand-cyan transition-colors">Trabalhe Conosco</a></li>
               </ul>
             </div>
 
@@ -50,10 +61,10 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
             <div className="text-left">
               <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Soluções</h4>
               <ul className="space-y-4 text-sm text-white/85">
-                <li><button onClick={() => onViewChange('services')} className="hover:text-brand-cyan transition-colors">Consultoria</button></li>
-                <li><button onClick={() => onViewChange('services')} className="hover:text-brand-cyan transition-colors">Finanças & Vórtex</button></li>
-                <li><button onClick={() => onViewChange('services')} className="hover:text-brand-cyan transition-colors">Sustentabilidade</button></li>
-                <li><button onClick={() => onViewChange('services')} className="hover:text-brand-cyan transition-colors">Treinamentos</button></li>
+                <li><a href={pathFromView('services', null)} onClick={(event) => handleNav(event, 'services')} className="hover:text-brand-cyan transition-colors">Consultoria</a></li>
+                <li><a href={pathFromView('services', null)} onClick={(event) => handleNav(event, 'services')} className="hover:text-brand-cyan transition-colors">Finanças & Vórtex</a></li>
+                <li><a href={pathFromView('services', null)} onClick={(event) => handleNav(event, 'services')} className="hover:text-brand-cyan transition-colors">Sustentabilidade</a></li>
+                <li><a href={pathFromView('services', null)} onClick={(event) => handleNav(event, 'services')} className="hover:text-brand-cyan transition-colors">Treinamentos</a></li>
               </ul>
             </div>
 

@@ -20,40 +20,8 @@ import CtaSection from './components/CtaSection';
 import ApplicationForm from './components/aplicacao/ApplicationForm';
 import Team from './components/equipe/Team';
 import MemberPage from './components/equipe/MemberPage';
-import { getMemberBySlug } from './components/equipe/teamData';
-
-/** Views com URL própria (as demais são navegadas por estado, na raiz). */
-const ROUTES: Partial<Record<ViewState, string>> = {
-  aplicacao: '/aplicacaocosmmus',
-  equipe: '/equipe',
-};
-
-/** Prefixo das páginas individuais da equipe: /equipe/<slug> */
-const MEMBER_PREFIX = '/equipe/';
-
-interface Route {
-  view: ViewState;
-  memberSlug?: string;
-}
-
-const routeFromPath = (pathname: string): Route | null => {
-  const normalized = pathname.replace(/\/+$/, '').toLowerCase() || '/';
-
-  if (normalized.startsWith(MEMBER_PREFIX)) {
-    const slug = normalized.slice(MEMBER_PREFIX.length);
-    // Slug desconhecido cai na listagem, evitando uma página vazia
-    return getMemberBySlug(slug) ? { view: 'equipe-detalhe', memberSlug: slug } : { view: 'equipe' };
-  }
-
-  const entry = Object.entries(ROUTES).find(([, path]) => path === normalized);
-  return entry ? { view: entry[0] as ViewState } : null;
-};
-
-/** Endereço correspondente ao estado atual da navegação. */
-const pathFromView = (view: ViewState, memberSlug: string | null): string => {
-  if (view === 'equipe-detalhe' && memberSlug) return `${MEMBER_PREFIX}${memberSlug}`;
-  return ROUTES[view] || '/';
-};
+import { applySeo } from './seo';
+import { routeFromPath, pathFromView } from './routes';
 
 const AppContent: React.FC = () => {
   const initialRoute = routeFromPath(window.location.pathname);
@@ -74,6 +42,8 @@ const AppContent: React.FC = () => {
     if (window.location.pathname.replace(/\/+$/, '') !== desired.replace(/\/+$/, '')) {
       window.history.pushState({}, '', desired);
     }
+    // Cada endereço precisa do seu próprio título, descrição e canonical
+    applySeo(currentView, currentMemberSlug, desired);
   }, [currentView, currentMemberSlug]);
 
   // Botões voltar/avançar do navegador

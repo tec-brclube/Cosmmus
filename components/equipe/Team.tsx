@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import { getInitials, getPhotoStyle, teamMembers } from './teamData';
+import { pathFromView, isPlainLeftClick } from '../../routes';
 
 interface TeamProps {
   onViewMember: (slug: string) => void;
@@ -94,10 +95,14 @@ const Team: React.FC<TeamProps> = ({ onViewMember, onCtaClick }) => {
                   </div>
                 )}
 
-                <div className="flex items-center text-brand-cyan font-medium text-sm mt-6 group-hover:translate-x-2 transition-transform">
+                <a
+                  href={pathFromView('equipe-detalhe', member.slug)}
+                  onClick={(event) => isPlainLeftClick(event) && event.preventDefault()}
+                  className="flex items-center text-brand-cyan font-medium text-sm mt-6 group-hover:translate-x-2 transition-transform"
+                >
                   Ver perfil completo
                   <ArrowRight size={16} className="ml-2" />
-                </div>
+                </a>
               </div>
             </article>
           ))}

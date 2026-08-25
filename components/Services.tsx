@@ -27,16 +27,19 @@ const Services: React.FC<ServicesProps> = ({ limit, onViewAll, onViewService }) 
   const { content } = useContent();
   const displayServices = limit ? content.services.slice(0, limit) : content.services;
 
+  // Como resumo na página inicial o título é um H2; como página própria, o H1 dela
+  const Title = limit ? 'h2' : 'h1';
+
   return (
     <section id="services-preview" className="py-32 bg-transparent relative border-t border-white/5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="flex flex-col items-center text-center mb-20 gap-8">
           <div className="max-w-3xl">
-            <h2 className="text-brand-pink font-bold tracking-widest uppercase text-xs mb-4">Nosso Arsenal</h2>
-            <h3 className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight">
+            <p className="text-brand-pink font-bold tracking-widest uppercase text-xs mb-4">Nosso Arsenal</p>
+            <Title className="text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight">
               Soluções para quem não aceita<br/> o <span className="text-brand-pink">médio</span>.
-            </h3>
+            </Title>
           </div>
           {limit && onViewAll && (
             <button 

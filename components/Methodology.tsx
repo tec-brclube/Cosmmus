@@ -8,6 +8,9 @@ interface MethodologyProps {
 }
 
 const Methodology: React.FC<MethodologyProps> = ({ preview }) => {
+
+  // Como resumo na página inicial o título é um H2; como página própria, o H1 dela
+  const Title = preview ? motion.h2 : motion.h1;
   const containerRef = useRef<HTMLDivElement>(null);
   const lineRef = useRef<HTMLDivElement>(null);
   
@@ -61,15 +64,15 @@ const Methodology: React.FC<MethodologyProps> = ({ preview }) => {
         
         {/* Header */}
         <div className="text-center mb-24">
-          <motion.h2 
+          <motion.p 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-brand-cyan font-bold tracking-widest uppercase text-sm mb-4 font-mono"
           >
             Metodologia: O Blueprint do Crescimento
-          </motion.h2>
-          <motion.h3 
+          </motion.p>
+          <Title 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -77,7 +80,7 @@ const Methodology: React.FC<MethodologyProps> = ({ preview }) => {
             className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight mb-6"
           >
             Transformamos complexidade em <span className="text-brand-pink">método</span>.
-          </motion.h3>
+          </Title>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

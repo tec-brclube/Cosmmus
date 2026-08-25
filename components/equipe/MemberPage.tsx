@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, ArrowRight, GraduationCap, Linkedin, Mail } from 'lucide-react';
 import { getInitials, getMemberBySlug, getPhotoStyle, teamMembers } from './teamData';
+import { pathFromView, isPlainLeftClick } from '../../routes';
 
 interface MemberPageProps {
   slug: string;
@@ -166,10 +167,14 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
           <h2 className="text-2xl md:text-3xl font-black tracking-tighter text-white mb-10">Conheça o restante do time</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {others.map((other) => (
-              <button
+              <a
                 key={other.slug}
-                type="button"
-                onClick={() => onViewMember(other.slug)}
+                href={pathFromView('equipe-detalhe', other.slug)}
+                onClick={(event) => {
+                  if (!isPlainLeftClick(event)) return;
+                  event.preventDefault();
+                  onViewMember(other.slug);
+                }}
                 className="group text-left rounded-2xl border border-white/10 bg-brand-surface/40 backdrop-blur-xl p-5 hover:border-white/20 hover:shadow-xl hover:shadow-brand-purple/20 transition-all duration-500 flex items-center gap-4"
               >
                 <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 bg-brand-navy">
@@ -189,7 +194,7 @@ const MemberPage: React.FC<MemberPageProps> = ({ slug, onBack, onViewMember, onC
                     {other.role}
                   </p>
                 </div>
-              </button>
+              </a>
             ))}
           </div>
         </div>

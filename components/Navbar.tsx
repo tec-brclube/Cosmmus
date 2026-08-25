@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import { ViewState, NavItem } from '../types';
 import { Logo } from './Logo';
+import { pathFromView, isPlainLeftClick } from '../routes';
 
 interface NavbarProps {
   currentView: ViewState;
@@ -30,15 +31,30 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
     setIsOpen(false);
   };
 
+  /**
+   * Itens do menu são links reais: o buscador consegue seguir o endereço e o
+   * visitante consegue abrir em outra aba. No clique comum, a navegação segue
+   * pela própria SPA, sem recarregar a página.
+   */
+  const linkProps = (view: ViewState) => ({
+    href: pathFromView(view, null),
+    onClick: (event: React.MouseEvent<HTMLAnchorElement>) => {
+      if (!isPlainLeftClick(event)) return;
+      event.preventDefault();
+      handleNav(view);
+    },
+  });
+
   return (
     <nav className="fixed top-0 w-full z-50 bg-brand-dark/90 backdrop-blur-md border-b border-white/10 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-24">
           
           {/* Logo */}
-          <div 
-            className="flex-shrink-0 flex items-center gap-4 cursor-pointer group" 
-            onClick={() => handleNav('home')}
+          <a
+            {...linkProps('home')}
+            aria-label="COSMMUS Business — página inicial"
+            className="flex-shrink-0 flex items-center gap-4 cursor-pointer group"
           >
             <div className="relative w-12 h-12 transition-transform duration-500 group-hover:rotate-180">
                <Logo className="w-full h-full" />
@@ -47,15 +63,16 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
                 <span className="font-black text-2xl tracking-tight text-white leading-none">COSMMUS</span>
                 <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-white/90 leading-none mt-1 ml-0.5">Business</span>
             </div>
-          </div>
+          </a>
 
           {/* Desktop Menu */}
           <div className="hidden xl:block">
             <div className="ml-10 flex items-center space-x-2">
               {navItems.map((item) => (
-                <button
+                <a
                   key={item.value}
-                  onClick={() => handleNav(item.value)}
+                  {...linkProps(item.value)}
+                  aria-current={currentView === item.value ? 'page' : undefined}
                   className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
                     currentView === item.value
                       ? 'text-brand-dark bg-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
@@ -63,11 +80,11 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
                   }`}
                 >
                   {item.label}
-                </button>
+                </a>
               ))}
 
-              <button
-                onClick={() => handleNav(ctaItem.value)}
+              <a
+                {...linkProps(ctaItem.value)}
                 title="Formulário de caracterização organizacional"
                 className={`ml-2 px-5 py-2 rounded-full text-sm font-bold transition-all duration-300 border ${
                   currentView === ctaItem.value
@@ -76,7 +93,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
                 }`}
               >
                 {ctaItem.label}
-              </button>
+              </a>
             </div>
           </div>
 
@@ -84,6 +101,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
           <div className="-mr-2 flex xl:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? 'Fechar menu' : 'Abrir menu'}
+              aria-expanded={isOpen}
               className="inline-flex items-center justify-center p-2 rounded-md text-white/85 hover:text-white hover:bg-gray-700 focus:outline-none"
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -96,8 +115,8 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
       {isOpen && (
         <div className="xl:hidden bg-brand-navy border-t border-white/10">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <button
-              onClick={() => handleNav(ctaItem.value)}
+            <a
+              {...linkProps(ctaItem.value)}
               className={`block w-full text-left px-3 py-4 mb-2 rounded-xl text-base font-bold border transition-all duration-300 ${
                 currentView === ctaItem.value
                   ? 'gradient-btn text-white border-transparent'
@@ -105,11 +124,12 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
               }`}
             >
               Aplique-se para consultoria
-            </button>
+            </a>
             {navItems.map((item) => (
-              <button
+              <a
                 key={item.value}
-                onClick={() => handleNav(item.value)}
+                {...linkProps(item.value)}
+                aria-current={currentView === item.value ? 'page' : undefined}
                 className={`block w-full text-left px-3 py-4 rounded-md text-base font-medium border-b border-white/5 last:border-0 ${
                   currentView === item.value
                     ? 'text-white bg-white/10 pl-6'
@@ -117,7 +137,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
                 } transition-all duration-300`}
               >
                 {item.label}
-              </button>
+              </a>
             ))}
           </div>
         </div>

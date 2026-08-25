@@ -1,0 +1,5 @@
+# COSMMUS Business — https://site.cosmmus.com
+User-agent: *
+Allow: /
+
+Sitemap: https://site.cosmmus.com/sitemap.xml
