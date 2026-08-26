@@ -21,8 +21,14 @@ const SHEET_PADRAO = 'Respostas';
 /** Evita que um envio adulterado crie abas com nomes estranhos. */
 const ABAS_PERMITIDAS = ['Respostas', 'Diagnostico Cosmmus'];
 
-/** Opcional: e-mail que recebe aviso quando um formulário é CONCLUÍDO. Vazio = não notifica. */
-const NOTIFY_EMAIL = '';
+/**
+ * Quem recebe aviso quando um formulário é CONCLUÍDO. Vários endereços,
+ * separados por vírgula. Deixe vazio ('') para não notificar ninguém.
+ *
+ * O aviso sai só no envio final — os salvamentos automáticos, que acontecem
+ * enquanto a pessoa preenche, não disparam e-mail.
+ */
+const NOTIFY_EMAIL = 'marcos@brclube.org,marcos@cosmmus.com';
 
 /**
  * Recebe o POST do site e grava ou atualiza a linha do protocolo.
@@ -156,6 +162,8 @@ function notify(payload, headers, row) {
     '2.1 Nome completo',
     '1 Nome da pessoa responsável pelo preenchimento',
   ]);
+  const email = primeiroDe(['2.4 E-mail profissional', 'C1 E-mail para contato']);
+  const telefone = primeiroDe(['2.5 Telefone ou WhatsApp', 'C2 WhatsApp']);
 
   MailApp.sendEmail({
     to: NOTIFY_EMAIL,
@@ -167,8 +175,8 @@ function notify(payload, headers, row) {
       'Início do preenchimento: ' + (payload.dataHora || '') + '\n' +
       'Organização: ' + organizacao + '\n' +
       'Responsável: ' + responsavel + '\n' +
-      'E-mail: ' + valueOf('2.4 E-mail profissional') + '\n' +
-      'Telefone: ' + valueOf('2.5 Telefone ou WhatsApp') + '\n\n' +
+      'E-mail: ' + email + '\n' +
+      'Telefone: ' + telefone + '\n\n' +
       'Abra a planilha para ver todas as respostas.',
   });
 }
