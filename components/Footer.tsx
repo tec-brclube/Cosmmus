@@ -1,5 +1,5 @@
 import React from 'react';
-import { Facebook, Instagram, Linkedin, ShieldCheck } from 'lucide-react';
+import { Facebook, Instagram, Linkedin } from 'lucide-react';
 import { ViewState } from '../types';
 import { Logo } from './Logo';
 import { pathFromView, isPlainLeftClick } from '../routes';
@@ -92,9 +92,6 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
           <div className="flex space-x-8 mt-4 md:mt-0 items-center">
             <a href="#" className="hover:text-white transition-colors">Política de Privacidade</a>
             <a href="#" className="hover:text-white transition-colors">Termos de Uso</a>
-            <button onClick={() => onViewChange('admin')} className="opacity-50 hover:opacity-100 flex items-center gap-1 ml-4" title="Área Administrativa">
-                <ShieldCheck size={12} />
-            </button>
           </div>
         </div>
       </div>

@@ -157,7 +157,7 @@ const setMemberJsonLd = (slug: string | null): void => {
 
 /**
  * Atualiza título, descrição, canonical e Open Graph de acordo com a view atual.
- * Views sem endereço próprio (detalhes de serviço/case, admin) reaproveitam os
+ * Views sem endereço próprio (detalhes de serviço e de case) reaproveitam os
  * dados da página inicial, já que continuam respondendo na raiz.
  */
 export const applySeo = (view: ViewState, memberSlug: string | null, path: string): void => {
@@ -182,12 +182,7 @@ export const applySeo = (view: ViewState, memberSlug: string | null, path: strin
   upsertMeta('name', 'twitter:description', entry.description);
   upsertMeta('name', 'twitter:image', SOCIAL_IMAGE);
 
-  // O painel administrativo não deve aparecer nos resultados de busca
-  upsertMeta(
-    'name',
-    'robots',
-    view === 'admin' ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1',
-  );
+  upsertMeta('name', 'robots', 'index, follow, max-image-preview:large, max-snippet:-1');
 
   setMemberJsonLd(view === 'equipe-detalhe' ? memberSlug : null);
 };

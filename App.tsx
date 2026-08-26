@@ -11,8 +11,6 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import Cases from './components/Cases';
 import Blog from './components/Blog';
-import AdminPanel from './components/AdminPanel';
-import AdminLogin from './components/AdminLogin';
 import { ContentProvider } from './context/ContentContext';
 import SpaceBackground from './components/SpaceBackground';
 import WhatsAppButton from './components/WhatsAppButton';
@@ -30,7 +28,6 @@ const AppContent: React.FC = () => {
   const [currentServiceId, setCurrentServiceId] = useState<string | null>(null);
   const [currentCaseId, setCurrentCaseId] = useState<string | null>(null);
   const [currentMemberSlug, setCurrentMemberSlug] = useState<string | null>(initialRoute?.memberSlug || null);
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
 
   // Scroll to top on view change
   useEffect(() => {
@@ -123,13 +120,6 @@ const AppContent: React.FC = () => {
   };
 
   const renderMainContent = () => {
-    if (currentView === 'admin') {
-      if (!isAdminAuthenticated) {
-        return <AdminLogin onLogin={() => setIsAdminAuthenticated(true)} onCancel={() => setCurrentView('home')} />;
-      }
-      return <AdminPanel onLogout={() => setIsAdminAuthenticated(false)} onExit={() => setCurrentView('home')} />;
-    }
-
     return (
       <>
         <Navbar currentView={currentView} onChangeView={setCurrentView} />
