@@ -74,8 +74,13 @@ const VIEW_SEO: Partial<Record<ViewState, SeoEntry>> = {
     description:
       'Fale com a COSMMUS Business e agende uma reunião estratégica para desenhar o próximo ciclo da sua empresa.',
   },
+  diagnostico: {
+    title: 'Diagnóstico Cosmmus | COSMMUS Business',
+    description:
+      'Conte em poucos minutos o momento da sua empresa, organização ou ideia: a Cosmmus Business avalia o escopo e monta uma proposta compatível.',
+  },
   aplicacao: {
-    title: 'Aplique-se | Caracterização Organizacional | COSMMUS Business',
+    title: 'NR-01 | Caracterização Organizacional | COSMMUS Business',
     description:
       'Formulário de caracterização organizacional da COSMMUS Business: o primeiro passo para o diagnóstico da sua empresa.',
   },

@@ -10,8 +10,16 @@
  * e os seguintes apenas atualizam a mesma linha, sem duplicar registros.
  */
 
-/** Nome da aba onde as respostas serão gravadas (criada automaticamente). */
-const SHEET_NAME = 'Respostas';
+/**
+ * Aba usada quando o site não informa uma. Cada formulário grava na sua
+ * própria aba (campo "aba" do envio), criada automaticamente na primeira
+ * resposta: 'Respostas' para a caracterização organizacional e
+ * 'Diagnostico Cosmmus' para o formulário de diagnóstico.
+ */
+const SHEET_PADRAO = 'Respostas';
+
+/** Evita que um envio adulterado crie abas com nomes estranhos. */
+const ABAS_PERMITIDAS = ['Respostas', 'Diagnostico Cosmmus'];
 
 /** Opcional: e-mail que recebe aviso quando um formulário é CONCLUÍDO. Vazio = não notifica. */
 const NOTIFY_EMAIL = '';
@@ -31,10 +39,12 @@ function doPost(e) {
     const incomingRow = payload.row || [];
     const protocolo = payload.protocolo || '';
 
+    const nomeAba = ABAS_PERMITIDAS.indexOf(payload.aba) === -1 ? SHEET_PADRAO : payload.aba;
+
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-    let sheet = spreadsheet.getSheetByName(SHEET_NAME);
+    let sheet = spreadsheet.getSheetByName(nomeAba);
     if (!sheet) {
-      sheet = spreadsheet.insertSheet(SHEET_NAME);
+      sheet = spreadsheet.insertSheet(nomeAba);
     }
 
     // Primeira execução: cria a linha de cabeçalho
@@ -77,6 +87,7 @@ function doPost(e) {
     return jsonOutput({
       result: 'success',
       protocolo: protocolo,
+      aba: nomeAba,
       acao: existingRow > 0 ? 'atualizado' : 'criado',
     });
   } catch (error) {
@@ -127,16 +138,35 @@ function notify(payload, headers, row) {
     return index === -1 ? '' : row[index];
   };
 
+  /** Primeira coluna preenchida entre as informadas. */
+  const primeiroDe = function (nomes) {
+    for (let i = 0; i < nomes.length; i++) {
+      const valor = valueOf(nomes[i]);
+      if (valor) return valor;
+    }
+    return '';
+  };
+
+  const organizacao = primeiroDe([
+    '1.2 Nome fantasia',
+    '1.1 Razão social',
+    '2 Nome da empresa, organização, projeto ou iniciativa',
+  ]);
+  const responsavel = primeiroDe([
+    '2.1 Nome completo',
+    '1 Nome da pessoa responsável pelo preenchimento',
+  ]);
+
   MailApp.sendEmail({
     to: NOTIFY_EMAIL,
-    subject: 'Formulário concluído — ' + (valueOf('1.2 Nome fantasia') || payload.protocolo || ''),
+    subject: 'Formulário concluído — ' + (organizacao || payload.protocolo || ''),
     body:
-      'Um formulário de caracterização organizacional foi CONCLUÍDO.\n\n' +
+      'Um formulário foi CONCLUÍDO no site.\n\n' +
+      'Formulário: ' + (payload.formulario || '') + '\n' +
       'Protocolo: ' + (payload.protocolo || '') + '\n' +
       'Início do preenchimento: ' + (payload.dataHora || '') + '\n' +
-      'Razão social: ' + valueOf('1.1 Razão social') + '\n' +
-      'Nome fantasia: ' + valueOf('1.2 Nome fantasia') + '\n' +
-      'Responsável: ' + valueOf('2.1 Nome completo') + '\n' +
+      'Organização: ' + organizacao + '\n' +
+      'Responsável: ' + responsavel + '\n' +
       'E-mail: ' + valueOf('2.4 E-mail profissional') + '\n' +
       'Telefone: ' + valueOf('2.5 Telefone ou WhatsApp') + '\n\n' +
       'Abra a planilha para ver todas as respostas.',

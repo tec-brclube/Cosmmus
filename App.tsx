@@ -18,6 +18,7 @@ import SpaceBackground from './components/SpaceBackground';
 import WhatsAppButton from './components/WhatsAppButton';
 import CtaSection from './components/CtaSection';
 import ApplicationForm from './components/aplicacao/ApplicationForm';
+import DiagnosticoForm from './components/diagnostico/DiagnosticoForm';
 import Team from './components/equipe/Team';
 import MemberPage from './components/equipe/MemberPage';
 import { applySeo } from './seo';
@@ -114,6 +115,8 @@ const AppContent: React.FC = () => {
         );
       case 'aplicacao':
         return <ApplicationForm />;
+      case 'diagnostico':
+        return <DiagnosticoForm />;
       default:
         return <Hero onCtaClick={() => setCurrentView('contact')} />;
     }

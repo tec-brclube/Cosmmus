@@ -1,9 +1,15 @@
 import React from 'react';
 import { Check } from 'lucide-react';
-import { FieldDef, FieldValue, FormValues, OTHER_SUFFIX } from './formSchema';
+import { FieldDef, FieldValue, FormValues, OTHER_SUFFIX } from './types';
 
-const OTHER_LABELS = ['Outro', 'Outra', 'Outros'];
-const isOtherOption = (option: string) => OTHER_LABELS.includes(option);
+const OTHER_LABELS = ['outro', 'outra', 'outros', 'outras'];
+
+/**
+ * Reconhece a opção "Outro" mesmo nas variações de grafia usadas pelos
+ * formulários: plural, feminino e ponto final ("Outras.").
+ */
+const isOtherOption = (option: string) =>
+  OTHER_LABELS.includes(option.trim().replace(/[.\s]+$/, '').toLowerCase());
 
 const inputClass =
   'w-full bg-transparent border-b-2 border-paper-muted/40 py-3 text-paper-ink text-base focus:border-paper-accent focus:outline-none transition-colors placeholder-paper-muted/70';

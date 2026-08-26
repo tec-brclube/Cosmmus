@@ -9,7 +9,8 @@
     { "source": "/cases", "destination": "/index.html" },
     { "source": "/conteudos", "destination": "/index.html" },
     { "source": "/contato", "destination": "/index.html" },
-    { "source": "/aplicacaocosmmus", "destination": "/index.html" }
+    { "source": "/aplicacaocosmmus", "destination": "/index.html" },
+    { "source": "/diagnostico", "destination": "/index.html" }
   ],
   "headers": [
     {

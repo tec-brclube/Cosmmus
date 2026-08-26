@@ -24,6 +24,7 @@ export const ROUTES: Partial<Record<ViewState, string>> = {
   blog: '/conteudos',
   contact: '/contato',
   aplicacao: '/aplicacaocosmmus',
+  diagnostico: '/diagnostico',
 };
 
 /** Prefixo das páginas individuais da equipe: /equipe/<slug> */

@@ -1,12 +1,13 @@
 import {
   FormValues,
   RowMeta,
+  SectionDef,
   SubmissionStatus,
-  allFields,
   buildHeaders,
   buildRow,
+  collectFields,
   OTHER_SUFFIX,
-} from './formSchema';
+} from './types';
 
 /**
  * Endpoint do Google Apps Script (implantado como aplicativo da web) que grava
@@ -16,6 +17,9 @@ import {
  * durante o build: mantê-lo em .env não o tornaria mais reservado, apenas
  * exigiria acesso ao painel da hospedagem para publicar o site. A proteção real
  * é o script aceitar somente gravação, nunca leitura.
+ *
+ * Os formulários compartilham o mesmo endpoint e a mesma planilha; cada um
+ * grava na sua própria aba, informada em `sheetName` (campo `aba` do envio).
  *
  * Para apontar para outra planilha (testes, homologação), defina
  * VITE_SHEETS_ENDPOINT em .env.local — o valor abaixo é usado apenas quando a
@@ -28,12 +32,23 @@ const ENDPOINT = (import.meta.env.VITE_SHEETS_ENDPOINT as string | undefined) ||
 
 export const hasEndpoint = (): boolean => ENDPOINT.startsWith('https://');
 
+/** Identifica o formulário que está enviando: nome, aba de destino e perguntas. */
+export interface FormSpec {
+  /** Nome registrado na planilha, para saber de qual formulário veio a linha. */
+  formName: string;
+  /** Aba da planilha que recebe as respostas. Criada automaticamente. */
+  sheetName: string;
+  /** Prefixo do protocolo, ex.: 'COSMMUS' gera COSMMUS-20260825-A1B2. */
+  protocolPrefix: string;
+  sections: SectionDef[];
+}
+
 /** Protocolo legível para o cliente e chave que identifica a linha na planilha. */
-export const generateProtocol = (): string => {
+export const generateProtocol = (prefix = 'COSMMUS'): string => {
   const now = new Date();
   const stamp = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
   const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `COSMMUS-${stamp}-${suffix}`;
+  return `${prefix}-${stamp}-${suffix}`;
 };
 
 /** Data e hora no fuso de Brasília. */
@@ -53,7 +68,7 @@ export interface SaveOptions {
   progress: string;
 }
 
-const buildPayload = (values: FormValues, options: SaveOptions) => {
+const buildPayload = (spec: FormSpec, values: FormValues, options: SaveOptions) => {
   const meta: RowMeta = {
     protocol: options.protocol,
     createdAt: options.createdAt,
@@ -63,12 +78,13 @@ const buildPayload = (values: FormValues, options: SaveOptions) => {
   };
 
   return {
-    formulario: 'Caracterização Organizacional — Riscos Psicossociais',
+    formulario: spec.formName,
+    aba: spec.sheetName,
     protocolo: meta.protocol,
     status: meta.status,
     dataHora: meta.createdAt,
-    headers: buildHeaders(),
-    row: buildRow(values, meta),
+    headers: buildHeaders(spec.sections),
+    row: buildRow(spec.sections, values, meta),
   };
 };
 
@@ -81,7 +97,11 @@ const buildPayload = (values: FormValues, options: SaveOptions) => {
  * Usa Content-Type text/plain para evitar preflight CORS (o Apps Script não
  * responde a OPTIONS).
  */
-export const saveToSheets = async (values: FormValues, options: SaveOptions): Promise<SubmitResult> => {
+export const saveToSheets = async (
+  spec: FormSpec,
+  values: FormValues,
+  options: SaveOptions,
+): Promise<SubmitResult> => {
   if (!hasEndpoint()) {
     return { ok: false, error: 'Endpoint de envio não configurado (VITE_SHEETS_ENDPOINT).' };
   }
@@ -90,7 +110,7 @@ export const saveToSheets = async (values: FormValues, options: SaveOptions): Pr
     const response = await fetch(ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(buildPayload(values, options)),
+      body: JSON.stringify(buildPayload(spec, values, options)),
       redirect: 'follow',
     });
 
@@ -117,10 +137,10 @@ export const saveToSheets = async (values: FormValues, options: SaveOptions): Pr
  * sendBeacon continua sendo enviado pelo navegador mesmo depois de a página
  * morrer, mas não permite ler a resposta — serve apenas como rede de segurança.
  */
-export const saveOnExit = (values: FormValues, options: SaveOptions): void => {
+export const saveOnExit = (spec: FormSpec, values: FormValues, options: SaveOptions): void => {
   if (!hasEndpoint() || typeof navigator.sendBeacon !== 'function') return;
   try {
-    const blob = new Blob([JSON.stringify(buildPayload(values, options))], {
+    const blob = new Blob([JSON.stringify(buildPayload(spec, values, options))], {
       type: 'text/plain;charset=utf-8',
     });
     navigator.sendBeacon(ENDPOINT, blob);
@@ -130,11 +150,15 @@ export const saveOnExit = (values: FormValues, options: SaveOptions): void => {
 };
 
 /** Gera um resumo em texto das respostas, para o cliente guardar uma cópia. */
-export const buildTextSummary = (values: FormValues, protocol: string): string => {
+export const buildTextSummary = (
+  spec: FormSpec,
+  titleLines: string[],
+  values: FormValues,
+  protocol: string,
+): string => {
   const lines: string[] = [
     'COSMMUS BUSINESS',
-    'Formulário de Caracterização Organizacional',
-    'Gestão de Riscos Psicossociais e Saúde no Trabalho',
+    ...titleLines,
     '',
     `Protocolo: ${protocol}`,
     `Data: ${new Date().toLocaleString('pt-BR')}`,
@@ -143,7 +167,7 @@ export const buildTextSummary = (values: FormValues, protocol: string): string =
     '',
   ];
 
-  for (const field of allFields) {
+  for (const field of collectFields(spec.sections)) {
     const value = values[field.id];
     let printed = '';
 

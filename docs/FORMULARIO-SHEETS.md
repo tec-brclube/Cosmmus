@@ -138,3 +138,37 @@ Sem essa regra, o link compartilhado abre erro 404 (o menu "Aplique-se" continua
 ## LGPD
 
 O formulário coleta dados de contato profissional e informações organizacionais — não deve receber nomes de trabalhadores nem dados de saúde individualizados (a pergunta 7 orienta a informar faixas salariais, não salários individuais). A etapa 11 registra o aceite explícito para tratamento dos dados com a finalidade de análise de escopo e elaboração de proposta.
+
+---
+
+## Dois formulários, uma planilha
+
+O site tem dois formulários, e os dois usam o mesmo Apps Script e a mesma
+planilha — cada um gravando em sua própria aba:
+
+| Formulário | Endereço | Aba | Protocolo |
+| --- | --- | --- | --- |
+| NR-01 — Caracterização Organizacional | `/aplicacaocosmmus` | `Respostas` | `COSMMUS-…` |
+| Diagnóstico Cosmmus | `/diagnostico` | `Diagnostico Cosmmus` | `DIAG-…` |
+
+A aba vai no campo `aba` de cada envio. O script só aceita os nomes listados em
+`ABAS_PERMITIDAS`, para que um envio adulterado não crie abas estranhas, e cria
+a aba sozinho na primeira resposta.
+
+**Ao publicar o Diagnóstico Cosmmus, atualize o Apps Script**: abra a
+planilha → Extensões → Apps Script, substitua o conteúdo por
+`google-apps-script/Codigo.gs` e implante uma nova versão. Sem isso, as
+respostas do formulário novo caem na aba `Respostas`, misturadas às do outro
+formulário e criando colunas novas no fim da planilha.
+
+### Onde mexer para mudar as perguntas
+
+- Caracterização organizacional: `components/aplicacao/formSchema.ts`
+- Diagnóstico Cosmmus: `components/diagnostico/formSchema.ts`
+- Textos de abertura e de conclusão: o arquivo do formulário
+  (`ApplicationForm.tsx` / `DiagnosticoForm.tsx`)
+- Tela, validação, rascunho e envio: `components/formulario/` — vale para os dois
+
+Alterar o texto de uma pergunta muda o nome da coluna na planilha. O script casa
+as colunas por nome, então a pergunta alterada vira uma coluna nova e a antiga
+fica com os dados já gravados.

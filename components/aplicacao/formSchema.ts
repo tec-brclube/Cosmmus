@@ -2,66 +2,13 @@
  * Schema do FORMULÁRIO DE CARACTERIZAÇÃO ORGANIZACIONAL
  * Gestão de Riscos Psicossociais e Saúde no Trabalho
  *
- * Este arquivo é a fonte única de verdade: define os campos exibidos na tela
- * e também os nomes das colunas enviadas para a planilha do Google Sheets.
+ * Este arquivo define as perguntas exibidas na tela e, por consequência, os
+ * nomes das colunas gravadas na planilha. A mecânica (tela, validação,
+ * rascunho e envio) é compartilhada com os demais formulários do site e mora
+ * em components/formulario.
  */
 
-export type FieldType =
-  | 'text'
-  | 'paragraph'
-  | 'number'
-  | 'email'
-  | 'tel'
-  | 'cnpj'
-  | 'select'
-  | 'radio'
-  | 'checkbox'
-  | 'scale'
-  | 'grid'
-  | 'numberGroup'
-  | 'consent';
-
-export type FieldValue = string | string[] | Record<string, string>;
-export type FormValues = Record<string, FieldValue>;
-
-export interface FieldDef {
-  /** Numeração oficial do formulário, ex.: '1.1'. Também é a chave do valor. */
-  id: string;
-  label: string;
-  type: FieldType;
-  required?: boolean;
-  /** Texto de orientação exibido abaixo do enunciado. */
-  help?: string;
-  placeholder?: string;
-  options?: string[];
-  /** Exibe campo de texto livre quando a opção "Outro/Outra/Outros" é marcada. */
-  allowOther?: boolean;
-  /** Linhas de uma grade ou de um grupo numérico. */
-  rows?: string[];
-  /** Colunas de uma grade de múltipla escolha. */
-  columns?: string[];
-  /** Título da primeira coluna de uma grade. */
-  rowHeader?: string;
-  /** Limite de opções marcáveis em caixas de seleção. */
-  maxSelections?: number;
-  scaleMin?: number;
-  scaleMax?: number;
-  scaleMinLabel?: string;
-  scaleMaxLabel?: string;
-  /** Exibição condicional. */
-  showIf?: (values: FormValues) => boolean;
-}
-
-export interface SectionDef {
-  /** Numeração oficial, ex.: '1'. */
-  number: string;
-  title: string;
-  /** Texto introdutório da etapa. */
-  intro?: string;
-  fields: FieldDef[];
-}
-
-export const OTHER_SUFFIX = '__outro';
+import { FieldValue, SectionDef } from '../formulario/types';
 
 /** Rótulos padronizados reutilizados em várias perguntas. */
 const SIM_NAO = ['Sim', 'Não'];
@@ -1981,69 +1928,3 @@ export const formSections: SectionDef[] = [
     ],
   },
 ];
-
-/** Todos os campos, na ordem do formulário. */
-export const allFields: FieldDef[] = formSections.flatMap((s) => s.fields);
-
-/** Situação do preenchimento, registrada na planilha. */
-export type SubmissionStatus = 'Em preenchimento' | 'Concluído';
-
-export interface RowMeta {
-  protocol: string;
-  /** Momento do primeiro salvamento — não muda nos salvamentos seguintes. */
-  createdAt: string;
-  /** Momento do último salvamento. */
-  updatedAt: string;
-  status: SubmissionStatus;
-  /** Etapa em que a pessoa estava, ex.: '7 de 22'. */
-  progress: string;
-}
-
-/** Colunas de controle, sempre no início da planilha. */
-export const META_HEADERS = ['Data/hora', 'Protocolo', 'Status', 'Última atualização', 'Etapa alcançada'];
-
-/**
- * Cabeçalhos das colunas da planilha, na ordem do formulário.
- * Campos compostos (grade e grupo numérico) geram uma coluna por linha.
- */
-export const buildHeaders = (): string[] => {
-  const headers = [...META_HEADERS];
-  for (const field of allFields) {
-    if (field.type === 'grid' || field.type === 'numberGroup') {
-      for (const row of field.rows || []) {
-        headers.push(`${field.id} ${field.label} [${row}]`);
-      }
-    } else {
-      headers.push(`${field.id} ${field.label}`);
-    }
-    if (field.allowOther) {
-      headers.push(`${field.id} ${field.label} [Outro - especificar]`);
-    }
-  }
-  return headers;
-};
-
-/** Converte os valores do formulário em uma linha alinhada a buildHeaders(). */
-export const buildRow = (values: FormValues, meta: RowMeta): string[] => {
-  const row: string[] = [meta.createdAt, meta.protocol, meta.status, meta.updatedAt, meta.progress];
-  for (const field of allFields) {
-    const value = values[field.id];
-    if (field.type === 'grid' || field.type === 'numberGroup') {
-      const record = (value && typeof value === 'object' && !Array.isArray(value) ? value : {}) as Record<string, string>;
-      for (const rowLabel of field.rows || []) {
-        row.push(record[rowLabel] ?? '');
-      }
-    } else if (Array.isArray(value)) {
-      row.push(value.join('; '));
-    } else if (field.type === 'consent') {
-      row.push(value === 'true' ? 'Sim' : 'Não');
-    } else {
-      row.push(typeof value === 'string' ? value : '');
-    }
-    if (field.allowOther) {
-      const other = values[field.id + OTHER_SUFFIX];
-      row.push(typeof other === 'string' ? other : '');
-    }
-  }
-  return row;
-};
