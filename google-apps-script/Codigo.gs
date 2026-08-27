@@ -96,6 +96,7 @@ function doPost(e) {
       return headers.indexOf(header) === -1;
     });
     if (missing.length > 0) {
+      if (typeof garantirColunas === 'function') garantirColunas(sheet, headers.length + missing.length);
       writeHeaders(sheet, headers.length + 1, missing);
       headers = headers.concat(missing);
     }

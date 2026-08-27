@@ -171,5 +171,6 @@ function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu('COSMMUS')
     .addItem('Atualizar painel', 'criarPainel')
+    .addItem('Recalcular respostas', 'recalcularRespostas')
     .addToUi();
 }

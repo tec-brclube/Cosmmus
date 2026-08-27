@@ -389,3 +389,89 @@ function avaliar(headers, row) {
     ],
   };
 }
+
+/**
+ * Garante que a aba tenha colunas suficientes.
+ * Sem isto, escrever além da grade da planilha dá erro em vez de expandi-la.
+ */
+function garantirColunas(aba, quantidade) {
+  var atuais = aba.getMaxColumns();
+  if (atuais < quantidade) aba.insertColumnsAfter(atuais, quantidade - atuais);
+}
+
+/**
+ * Aplica o modelo às respostas que já estão na planilha.
+ *
+ * Serve para dois casos: a primeira implantação, quando existem respostas
+ * anteriores ao modelo; e depois de mexer nas tabelas de pontuação, para
+ * reprocessar tudo com os critérios novos.
+ *
+ * Só pontua linhas com status "Concluído" — formulário incompleto não tem
+ * dados suficientes e receberia um IPC enganoso. Anotações já feitas na
+ * coluna "Situação da precificação" são preservadas.
+ *
+ * COMO USAR: selecione recalcularRespostas no menu de funções e execute.
+ */
+function recalcularRespostas() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var aba = ss.getSheetByName(ABA_DADOS);
+  if (!aba) throw new Error('Não encontrei a aba "' + ABA_DADOS + '".');
+
+  var ultimaLinha = aba.getLastRow();
+  if (ultimaLinha < 2) throw new Error('A aba "' + ABA_DADOS + '" ainda não tem respostas.');
+
+  var headers = aba.getRange(1, 1, 1, aba.getLastColumn()).getValues()[0];
+
+  // Cria as colunas do modelo que ainda não existirem, à direita das demais
+  var faltantes = COLUNAS_AVALIACAO.filter(function (nome) {
+    return headers.indexOf(nome) === -1;
+  });
+  if (faltantes.length > 0) {
+    garantirColunas(aba, headers.length + faltantes.length);
+    aba
+      .getRange(1, headers.length + 1, 1, faltantes.length)
+      .setValues([faltantes])
+      .setFontWeight('bold')
+      .setBackground('#120b24')
+      .setFontColor('#ffffff')
+      .setWrap(true);
+    headers = headers.concat(faltantes);
+  }
+
+  var colStatus = headers.indexOf('Status');
+  var colSituacao = headers.indexOf('Situação da precificação');
+  var primeiraColuna = headers.indexOf(COLUNAS_AVALIACAO[0]) + 1;
+
+  var linhas = aba.getRange(2, 1, ultimaLinha - 1, headers.length).getValues();
+  var pontuadas = 0;
+  var ignoradas = 0;
+
+  for (var i = 0; i < linhas.length; i++) {
+    var linha = linhas[i];
+
+    // Linha vazia (sem protocolo) não interessa
+    if (!String(linha[headers.indexOf('Protocolo')] || '').trim()) continue;
+
+    if (String(linha[colStatus] || '').trim() !== 'Concluído') {
+      ignoradas++;
+      continue;
+    }
+
+    var resultado = avaliar(headers, linha);
+    var valores = resultado.valores.slice();
+
+    // Preserva o que alguém já escreveu na coluna de revisão
+    var situacaoAtual = colSituacao === -1 ? '' : String(linha[colSituacao] || '').trim();
+    if (situacaoAtual) valores[valores.length - 1] = situacaoAtual;
+
+    aba.getRange(i + 2, primeiraColuna, 1, valores.length).setValues([valores]);
+    pontuadas++;
+  }
+
+  var recado =
+    pontuadas + ' resposta(s) pontuada(s).' +
+    (ignoradas > 0 ? ' ' + ignoradas + ' ignorada(s) por não estarem concluídas.' : '');
+  SpreadsheetApp.getActive().toast(recado, 'COSMMUS', 8);
+  console.log(recado);
+  return recado;
+}
