@@ -72,11 +72,20 @@ function criarPainel() {
     painel = ss.insertSheet(ABA_PAINEL, 0);
   }
 
+  /**
+   * Separador de argumentos das fórmulas.
+   * Planilha em português usa ponto e vírgula; em inglês, vírgula. Escrever
+   * com o separador errado gera "erro de análise de fórmula" em toda célula
+   * com mais de um argumento.
+   */
+  var idioma = String(ss.getSpreadsheetLocale() || '');
+  var sep = idioma.indexOf('en') === 0 ? ',' : ';';
+
   var aba = "'" + ABA_DADOS + "'!";
   var faixa = function (coluna) {
     return aba + coluna + '2:' + coluna;
   };
-  var concluido = faixa(cStatus) + ',"Concluído"';
+  var concluido = faixa(cStatus) + sep + '"Concluído"';
 
   // ── Cabeçalho ──
   painel.getRange('A1').setValue('Painel de oportunidades — Diagnóstico Cosmmus');
@@ -88,10 +97,10 @@ function criarPainel() {
     ['Formulários iniciados', '=COUNTA(' + faixa(cProtocolo) + ')'],
     ['Formulários concluídos', '=COUNTIF(' + concluido + ')'],
     ['Abandonados no meio', '=COUNTA(' + faixa(cProtocolo) + ')-COUNTIF(' + concluido + ')'],
-    ['IPC médio', '=IFERROR(ROUND(AVERAGEIF(' + concluido + ',' + faixa(cIpc) + '),1),"—")'],
-    ['Funil — piso somado', '=SUMIF(' + concluido + ',' + faixa(cMin) + ')'],
-    ['Funil — teto somado', '=SUMIF(' + concluido + ',' + faixa(cMax) + ')'],
-    ['Aguardando revisão humana', '=COUNTIF(' + faixa(cSituacao) + ',"Aguardando revisão humana")'],
+    ['IPC médio', '=IFERROR(ROUND(AVERAGEIF(' + concluido + sep + faixa(cIpc) + ')' + sep + '1)' + sep + '"—")'],
+    ['Funil — piso somado', '=SUMIF(' + concluido + sep + faixa(cMin) + ')'],
+    ['Funil — teto somado', '=SUMIF(' + concluido + sep + faixa(cMax) + ')'],
+    ['Aguardando revisão humana', '=COUNTIF(' + faixa(cSituacao) + sep + '"Aguardando revisão humana")'],
   ];
   painel.getRange(4, 1, indicadores.length, 2).setValues(indicadores);
   painel.getRange(9, 2, 2, 1).setNumberFormat('R$ #,##0');
@@ -107,9 +116,9 @@ function criarPainel() {
   for (var n = 0; n < niveis.length; n++) {
     distribuicao.push([
       niveis[n],
-      '=COUNTIF(' + faixa(cNivel) + ',"' + niveis[n] + '")',
-      '=SUMIF(' + faixa(cNivel) + ',"' + niveis[n] + '",' + faixa(cMin) + ')',
-      '=SUMIF(' + faixa(cNivel) + ',"' + niveis[n] + '",' + faixa(cMax) + ')',
+      '=COUNTIF(' + faixa(cNivel) + sep + '"' + niveis[n] + '")',
+      '=SUMIF(' + faixa(cNivel) + sep + '"' + niveis[n] + '"' + sep + faixa(cMin) + ')',
+      '=SUMIF(' + faixa(cNivel) + sep + '"' + niveis[n] + '"' + sep + faixa(cMax) + ')',
     ]);
   }
   var linhaDist = 4 + indicadores.length + 1;
@@ -128,7 +137,7 @@ function criarPainel() {
   ];
   var tabelaAlertas = [['Alerta principal', 'Quantidade']];
   for (var a = 0; a < alertas.length; a++) {
-    tabelaAlertas.push([alertas[a], '=COUNTIF(' + faixa(cAlerta) + ',"' + alertas[a] + '")']);
+    tabelaAlertas.push([alertas[a], '=COUNTIF(' + faixa(cAlerta) + sep + '"' + alertas[a] + '")']);
   }
   var linhaAlertas = linhaDist + distribuicao.length + 1;
   painel.getRange(linhaAlertas, 1, tabelaAlertas.length, 2).setValues(tabelaAlertas);
@@ -142,8 +151,8 @@ function criarPainel() {
     .join(', ');
 
   var consulta =
-    '=IFERROR(QUERY(' + aba + 'A2:' + colunaParaLetra(headers.length) + ', ' +
-    '"select ' + colunasQuery + " where " + cStatus + " = 'Concluído' order by " + cIpc + ' desc", 0), ' +
+    '=IFERROR(QUERY(' + aba + 'A2:' + colunaParaLetra(headers.length) + sep + ' ' +
+    '"select ' + colunasQuery + " where " + cStatus + " = 'Concluído' order by " + cIpc + ' desc"' + sep + ' 0)' + sep + ' ' +
     '"Nenhum formulário concluído ainda.")';
 
   var titulos = ['Empresa', 'Segmento', 'Cidade', 'IPC', 'Nível', 'Piso', 'Teto', 'Alerta', 'Protocolo'];
