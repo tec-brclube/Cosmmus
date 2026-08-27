@@ -232,3 +232,22 @@ dimensão passa a usar a nota padrão silenciosamente.
 As perguntas são localizadas pelo número (`12`, `7B`, `2.1`), não pelo
 enunciado inteiro, então reescrever o texto de uma pergunta não quebra o
 modelo — só reescrever as **opções de resposta** quebra.
+
+### Painel
+
+`Painel.gs` cria uma **aba nova**, chamada `Painel`, na própria planilha das
+respostas. Ela traz indicadores (iniciados, concluídos, abandonados, IPC
+médio, piso e teto somados do funil), a distribuição por nível, a contagem de
+alertas e a lista de oportunidades concluídas, ordenada da mais complexa para
+a mais simples.
+
+Para criar: no editor do Apps Script, escolha a função `criarPainel` e clique
+em Executar. Depois disso, a planilha ganha o menu **COSMMUS → Atualizar
+painel**, que refaz a estrutura sem passar pelo editor.
+
+Os números são fórmulas: uma vez criado, o painel se atualiza sozinho a cada
+resposta nova. Só é preciso rodar de novo se colunas mudarem de lugar — por
+exemplo, depois de acrescentar perguntas ao formulário.
+
+O painel apenas lê as colunas que o `Avaliacao.gs` grava. Quem calcula é o
+script: assim existe uma fonte de verdade só.
