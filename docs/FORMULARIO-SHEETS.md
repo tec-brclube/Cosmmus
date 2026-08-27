@@ -193,3 +193,42 @@ apaga a URL.
 Se o Chat estiver fora do ar ou a URL estiver errada, a resposta do cliente
 não se perde: a linha já foi gravada antes, e a falha aparece apenas no log de
 execuções do Apps Script.
+
+## Dimensionamento automático (IPC)
+
+`Avaliacao.gs` traz o modelo do "Pré-Diagnóstico Cosmmus Business v1.1"
+adaptado às perguntas do Diagnóstico do site. A cada formulário **concluído**,
+o script pontua nove dimensões de 1 a 4, soma o IPC (9 a 36) e acrescenta 19
+colunas à direita das respostas: as notas por dimensão, nível, horas, equipe,
+prazo, faixa de preço e o alerta principal.
+
+| Dimensão | De onde vem |
+| --- | --- |
+| Porte | 8A, 7B, 8B, 9B — vale a maior evidência |
+| Maturidade organizacional | 12 e 13 — vale a pior |
+| Maturidade financeira | 14 |
+| Tecnologia e dados | 18, reforçado por sinais da 16 |
+| Amplitude do escopo | 22 — quantidade de áreas marcadas |
+| Qualidade das informações | 23 |
+| Disponibilidade das pessoas | 24 |
+| Urgência | 25 |
+| Entregável | 5 — o objetivo mais pesado marcado |
+
+Níveis: I Essencial (9–14), II Estruturado (15–21), III Amplo (22–28),
+IV Alta Complexidade (29–36). O preço sai de `horas × taxa média ponderada ×
+(1 + reserva de escopo) × fator de urgência`, com as taxas em `PARAMETROS`.
+
+**A faixa é referência interna, nunca preço final.** Toda linha nasce com
+"Aguardando revisão humana" na última coluna, como no modelo original.
+
+### Para calibrar
+
+Depois de alguns projetos, compare horas previstas com realizadas e ajuste
+`PARAMETROS` e `NIVEIS`, no topo do `Avaliacao.gs`. As tabelas de pontuação
+(`PONTOS`) casam o texto exato de cada resposta: se você reescrever uma opção
+no formulário do site, atualize o texto correspondente aqui — senão a
+dimensão passa a usar a nota padrão silenciosamente.
+
+As perguntas são localizadas pelo número (`12`, `7B`, `2.1`), não pelo
+enunciado inteiro, então reescrever o texto de uma pergunta não quebra o
+modelo — só reescrever as **opções de resposta** quebra.

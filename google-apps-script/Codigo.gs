@@ -52,9 +52,27 @@ function doPost(e) {
 
   try {
     const payload = JSON.parse(e.postData.contents);
-    const incomingHeaders = payload.headers || [];
-    const incomingRow = payload.row || [];
+    const incomingHeaders = (payload.headers || []).slice();
+    const incomingRow = (payload.row || []).slice();
     const protocolo = payload.protocolo || '';
+
+    /**
+     * Dimensionamento (IPC): só faz sentido com o formulário inteiro, então
+     * roda apenas no envio final. Enquanto está sendo preenchido, as colunas
+     * do modelo ficam em branco.
+     */
+    let avaliacao = null;
+    if (payload.status === 'Concluído' && typeof avaliar === 'function') {
+      try {
+        avaliacao = avaliar(incomingHeaders, incomingRow);
+        for (let a = 0; a < COLUNAS_AVALIACAO.length; a++) {
+          incomingHeaders.push(COLUNAS_AVALIACAO[a]);
+          incomingRow.push(avaliacao.valores[a]);
+        }
+      } catch (erroModelo) {
+        console.error('Falha ao calcular o IPC: ' + erroModelo);
+      }
+    }
 
     const nomeAba = ABAS_PERMITIDAS.indexOf(payload.aba) === -1 ? SHEET_PADRAO : payload.aba;
 
@@ -82,13 +100,21 @@ function doPost(e) {
       headers = headers.concat(missing);
     }
 
-    // Monta a linha na ordem das colunas existentes
-    const row = headers.map(function (header) {
-      const index = incomingHeaders.indexOf(header);
-      return index === -1 ? '' : incomingRow[index];
-    });
-
     const existingRow = findRowByProtocol(sheet, headers, protocolo);
+
+    /**
+     * Valores que já estão na linha. Colunas que o site não envia — anotações,
+     * status de revisão, colunas criadas à mão — são preservadas em vez de
+     * apagadas a cada salvamento.
+     */
+    const atuais = existingRow > 0 ? sheet.getRange(existingRow, 1, 1, headers.length).getValues()[0] : [];
+
+    // Monta a linha na ordem das colunas existentes
+    const row = headers.map(function (header, posicao) {
+      const index = incomingHeaders.indexOf(header);
+      if (index !== -1) return incomingRow[index];
+      return atuais[posicao] === undefined ? '' : atuais[posicao];
+    });
 
     if (existingRow > 0) {
       sheet.getRange(existingRow, 1, 1, row.length).setValues([row]);
@@ -98,8 +124,8 @@ function doPost(e) {
 
     // Notifica apenas quando o formulário é finalizado
     if (payload.status === 'Concluído') {
-      if (NOTIFY_EMAIL) notify(payload, headers, row);
-      if (CHAT_WEBHOOK) notificarChat(payload, headers, row);
+      if (NOTIFY_EMAIL) notify(payload, headers, row, avaliacao);
+      if (CHAT_WEBHOOK) notificarChat(payload, headers, row, avaliacao);
     }
 
     return jsonOutput({
@@ -150,7 +176,7 @@ function writeHeaders(sheet, startColumn, values) {
     .setWrap(true);
 }
 
-function notify(payload, headers, row) {
+function notify(payload, headers, row, avaliacao) {
   const valueOf = function (headerName) {
     const index = headers.indexOf(headerName);
     return index === -1 ? '' : row[index];
@@ -188,8 +214,10 @@ function notify(payload, headers, row) {
       'Organização: ' + organizacao + '\n' +
       'Responsável: ' + responsavel + '\n' +
       'E-mail: ' + email + '\n' +
-      'Telefone: ' + telefone + '\n\n' +
-      'Abra a planilha para ver todas as respostas.',
+      'Telefone: ' + telefone + '\n' +
+      (avaliacao ? 'Dimensionamento: IPC ' + avaliacao.ipc + ' — ' + avaliacao.nivel.nome + '\n' : '') +
+      (avaliacao ? 'Faixa de referência: R$ ' + avaliacao.precoMin + ' a R$ ' + avaliacao.precoMax + ' (aguardando revisão humana)\n' : '') +
+      '\nAbra a planilha para ver todas as respostas.',
   });
 }
 
@@ -200,7 +228,7 @@ function notify(payload, headers, row) {
  * URL estiver errada, a resposta do cliente não se perde — apenas o aviso
  * deixa de sair, e o erro fica registrado no log de execuções.
  */
-function notificarChat(payload, headers, row) {
+function notificarChat(payload, headers, row, avaliacao) {
   const valueOf = function (headerName) {
     const index = headers.indexOf(headerName);
     return index === -1 ? '' : row[index];
@@ -236,6 +264,11 @@ function notificarChat(payload, headers, row) {
   if (email) linhas.push('*E-mail:* ' + email);
   if (telefone) linhas.push('*WhatsApp:* ' + telefone);
   if (necessidade) linhas.push('*O que procura:* ' + String(necessidade).slice(0, 300));
+  if (avaliacao) {
+    linhas.push('*Dimensionamento:* IPC ' + avaliacao.ipc + ' — ' + avaliacao.nivel.nome);
+    linhas.push('*Referência interna:* R$ ' + avaliacao.precoMin + ' a R$ ' + avaliacao.precoMax + ' · ' + avaliacao.nivel.horasMin + '–' + avaliacao.nivel.horasMax + 'h · equipe ' + avaliacao.nivel.equipe + ' · ' + avaliacao.nivel.prazo);
+    linhas.push('_' + avaliacao.alerta + ' · aguardando revisão humana_');
+  }
   linhas.push('*Protocolo:* ' + (payload.protocolo || ''));
 
   try {
