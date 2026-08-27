@@ -172,3 +172,24 @@ formulário e criando colunas novas no fim da planilha.
 Alterar o texto de uma pergunta muda o nome da coluna na planilha. O script casa
 as colunas por nome, então a pergunta alterada vira uma coluna nova e a antiga
 fica com os dados já gravados.
+
+## Avisos de formulário concluído
+
+O Apps Script avisa por dois canais quando alguém **conclui** um formulário.
+Salvamentos automáticos, que acontecem enquanto a pessoa preenche, nunca
+disparam aviso.
+
+| Canal | Constante | Onde configurar |
+| --- | --- | --- |
+| E-mail | `NOTIFY_EMAIL` | pode ficar no repositório |
+| Google Chat | `CHAT_WEBHOOK` | **somente no editor do Apps Script** |
+
+O webhook do Chat carrega chave e token de acesso ao espaço na própria URL —
+quem tem a URL consegue publicar mensagens lá. Por isso ele fica vazio aqui e
+é preenchido apenas no editor do Apps Script, que não é público. Ao atualizar
+o script, lembre de repor o valor: colar o arquivo do repositório por cima
+apaga a URL.
+
+Se o Chat estiver fora do ar ou a URL estiver errada, a resposta do cliente
+não se perde: a linha já foi gravada antes, e a falha aparece apenas no log de
+execuções do Apps Script.

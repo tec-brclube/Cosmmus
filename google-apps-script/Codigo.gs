@@ -31,6 +31,17 @@ const ABAS_PERMITIDAS = ['Respostas', 'Diagnostico Cosmmus'];
 const NOTIFY_EMAIL = 'marcos@brclube.org,marcos@cosmmus.com';
 
 /**
+ * Webhook do Google Chat que recebe aviso de formulário concluído.
+ *
+ * DEIXE VAZIO NO REPOSITÓRIO. A URL contém chave e token de acesso ao espaço
+ * do chat: preencha somente aqui no editor do Apps Script, que não é público.
+ * Quem tiver a URL consegue publicar mensagens no espaço.
+ *
+ * Vazio ('') = não avisa no chat.
+ */
+const CHAT_WEBHOOK = '';
+
+/**
  * Recebe o POST do site e grava ou atualiza a linha do protocolo.
  * As colunas são casadas por NOME de cabeçalho, então alterar a ordem das
  * perguntas no site não desalinha os dados já gravados.
@@ -86,8 +97,9 @@ function doPost(e) {
     }
 
     // Notifica apenas quando o formulário é finalizado
-    if (NOTIFY_EMAIL && payload.status === 'Concluído') {
-      notify(payload, headers, row);
+    if (payload.status === 'Concluído') {
+      if (NOTIFY_EMAIL) notify(payload, headers, row);
+      if (CHAT_WEBHOOK) notificarChat(payload, headers, row);
     }
 
     return jsonOutput({
@@ -179,6 +191,70 @@ function notify(payload, headers, row) {
       'Telefone: ' + telefone + '\n\n' +
       'Abra a planilha para ver todas as respostas.',
   });
+}
+
+/**
+ * Publica um aviso no espaço do Google Chat.
+ *
+ * Roda depois de a linha já estar gravada: se o chat estiver fora do ar ou a
+ * URL estiver errada, a resposta do cliente não se perde — apenas o aviso
+ * deixa de sair, e o erro fica registrado no log de execuções.
+ */
+function notificarChat(payload, headers, row) {
+  const valueOf = function (headerName) {
+    const index = headers.indexOf(headerName);
+    return index === -1 ? '' : row[index];
+  };
+
+  const primeiroDe = function (nomes) {
+    for (let i = 0; i < nomes.length; i++) {
+      const valor = valueOf(nomes[i]);
+      if (valor) return valor;
+    }
+    return '';
+  };
+
+  const organizacao = primeiroDe([
+    '1.2 Nome fantasia',
+    '1.1 Razão social',
+    '2 Nome da empresa, organização, projeto ou iniciativa',
+  ]);
+  const responsavel = primeiroDe(['2.1 Nome completo', '1 Nome da pessoa responsável pelo preenchimento']);
+  const email = primeiroDe(['2.4 E-mail profissional', 'C1 E-mail para contato']);
+  const telefone = primeiroDe(['2.5 Telefone ou WhatsApp', 'C2 WhatsApp']);
+  const segmento = valueOf('2.1 Qual é o segmento ou a atividade principal?');
+  const cidade = valueOf('2.2 Em qual cidade a iniciativa está baseada?');
+  const necessidade = primeiroDe([
+    '6 Em poucas palavras, quais são hoje as três principais preocupações, problemas, necessidades ou oportunidades que levaram você a procurar a Cosmmus?',
+  ]);
+
+  const linhas = ['*Novo formulário concluído* — ' + (payload.formulario || '')];
+  if (organizacao) linhas.push('*Organização:* ' + organizacao);
+  if (segmento) linhas.push('*Segmento:* ' + segmento);
+  if (cidade) linhas.push('*Cidade:* ' + cidade);
+  if (responsavel) linhas.push('*Responsável:* ' + responsavel);
+  if (email) linhas.push('*E-mail:* ' + email);
+  if (telefone) linhas.push('*WhatsApp:* ' + telefone);
+  if (necessidade) linhas.push('*O que procura:* ' + String(necessidade).slice(0, 300));
+  linhas.push('*Protocolo:* ' + (payload.protocolo || ''));
+
+  try {
+    const url = SpreadsheetApp.getActiveSpreadsheet().getUrl();
+    linhas.push('<' + url + '|Abrir a planilha>');
+  } catch (erro) {
+    // sem link: segue sem ele
+  }
+
+  try {
+    UrlFetchApp.fetch(CHAT_WEBHOOK, {
+      method: 'post',
+      contentType: 'application/json; charset=UTF-8',
+      payload: JSON.stringify({ text: linhas.join('\n') }),
+      muteHttpExceptions: true,
+    });
+  } catch (erro) {
+    console.error('Falha ao avisar no Google Chat: ' + erro);
+  }
 }
 
 function jsonOutput(obj) {
