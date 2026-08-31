@@ -229,61 +229,144 @@ function notify(payload, headers, row, avaliacao) {
  * URL estiver errada, a resposta do cliente não se perde — apenas o aviso
  * deixa de sair, e o erro fica registrado no log de execuções.
  */
+/** Colunas de controle e do modelo: já vão no resumo, não se repetem na lista. */
+var COLUNAS_FORA_DA_LISTA = [
+  'Data/hora',
+  'Protocolo',
+  'Status',
+  'Última atualização',
+  'Etapa alcançada',
+];
+
+/** Limite de caracteres por mensagem no Google Chat, com folga. */
+var LIMITE_CHAT = 3800;
+
+/**
+ * Publica no espaço do Google Chat o resumo e, em seguida, todas as respostas.
+ *
+ * As mensagens vão agrupadas numa conversa só, identificada pelo protocolo,
+ * para o espaço não encher de mensagens soltas. Respostas longas são
+ * quebradas em partes, porque o Chat recusa mensagem acima de 4 mil
+ * caracteres.
+ *
+ * Roda depois de a linha já estar gravada: se o Chat falhar, a resposta do
+ * cliente não se perde — o erro fica no log de execuções.
+ */
 function notificarChat(payload, headers, row, avaliacao) {
-  const valueOf = function (headerName) {
-    const index = headers.indexOf(headerName);
+  var valueOf = function (headerName) {
+    var index = headers.indexOf(headerName);
     return index === -1 ? '' : row[index];
   };
 
-  const primeiroDe = function (nomes) {
-    for (let i = 0; i < nomes.length; i++) {
-      const valor = valueOf(nomes[i]);
+  var primeiroDe = function (nomes) {
+    for (var i = 0; i < nomes.length; i++) {
+      var valor = valueOf(nomes[i]);
       if (valor) return valor;
     }
     return '';
   };
 
-  const organizacao = primeiroDe([
+  var porInicio = function (inicio) {
+    for (var i = 0; i < headers.length; i++) {
+      if (String(headers[i]).indexOf(inicio) === 0) return row[i] || '';
+    }
+    return '';
+  };
+
+  var organizacao = primeiroDe([
     '1.2 Nome fantasia',
     '1.1 Razão social',
     '2 Nome da empresa, organização, projeto ou iniciativa',
   ]);
-  const responsavel = primeiroDe(['2.1 Nome completo', '1 Nome da pessoa responsável pelo preenchimento']);
-  const email = primeiroDe(['2.4 E-mail profissional', 'C1 E-mail para contato']);
-  const telefone = primeiroDe(['2.5 Telefone ou WhatsApp', 'C2 WhatsApp']);
-  const segmento = valueOf('2.1 Qual é o segmento ou a atividade principal?');
-  const cidade = valueOf('2.2 Em qual cidade a iniciativa está baseada?');
-  const necessidade = primeiroDe([
-    '6 Em poucas palavras, quais são hoje as três principais preocupações, problemas, necessidades ou oportunidades que levaram você a procurar a Cosmmus?',
-  ]);
+  var responsavel = primeiroDe(['2.1 Nome completo', '1 Nome da pessoa responsável pelo preenchimento']);
+  var email = primeiroDe(['2.4 E-mail profissional', 'C1 E-mail para contato']);
+  var telefone = primeiroDe(['2.5 Telefone ou WhatsApp', 'C2 WhatsApp']);
+  var instagram = porInicio('C3 ');
+  var segmento = porInicio('2.1 Qual é o segmento');
+  var cidade = porInicio('2.2 Em qual cidade');
 
-  const linhas = ['*Novo formulário concluído* — ' + (payload.formulario || '')];
-  if (organizacao) linhas.push('*Organização:* ' + organizacao);
-  if (segmento) linhas.push('*Segmento:* ' + segmento);
-  if (cidade) linhas.push('*Cidade:* ' + cidade);
-  if (responsavel) linhas.push('*Responsável:* ' + responsavel);
-  if (email) linhas.push('*E-mail:* ' + email);
-  if (telefone) linhas.push('*WhatsApp:* ' + telefone);
-  if (necessidade) linhas.push('*O que procura:* ' + String(necessidade).slice(0, 300));
+  // ── Resumo, para decidir sem abrir nada ──
+  var resumo = ['*Novo formulário concluído* — ' + (payload.formulario || '')];
+  if (organizacao) resumo.push('*Organização:* ' + organizacao);
+  if (segmento) resumo.push('*Segmento:* ' + segmento);
+  if (cidade) resumo.push('*Cidade:* ' + cidade);
+  if (responsavel) resumo.push('*Responsável:* ' + responsavel);
+  if (email) resumo.push('*E-mail:* ' + email);
+  if (telefone) resumo.push('*WhatsApp:* ' + telefone);
+  if (instagram) resumo.push('*Instagram:* ' + instagram);
   if (avaliacao) {
-    linhas.push('*Dimensionamento:* IPC ' + avaliacao.ipc + ' — ' + avaliacao.nivel.nome);
-    linhas.push('*Referência interna:* R$ ' + avaliacao.precoMin + ' a R$ ' + avaliacao.precoMax + ' · ' + avaliacao.nivel.horasMin + '–' + avaliacao.nivel.horasMax + 'h · equipe ' + avaliacao.nivel.equipe + ' · ' + avaliacao.nivel.prazo);
-    linhas.push('_' + avaliacao.alerta + ' · aguardando revisão humana_');
+    resumo.push('*Dimensionamento:* IPC ' + avaliacao.ipc + ' — ' + avaliacao.nivel.nome);
+    resumo.push(
+      '*Referência interna:* R$ ' + avaliacao.precoMin + ' a R$ ' + avaliacao.precoMax +
+      ' · ' + avaliacao.nivel.horasMin + '–' + avaliacao.nivel.horasMax + 'h' +
+      ' · equipe ' + avaliacao.nivel.equipe + ' · ' + avaliacao.nivel.prazo,
+    );
+    resumo.push('_' + avaliacao.alerta + ' · aguardando revisão humana_');
   }
-  linhas.push('*Protocolo:* ' + (payload.protocolo || ''));
+  resumo.push('*Protocolo:* ' + (payload.protocolo || ''));
 
   try {
-    const url = SpreadsheetApp.getActiveSpreadsheet().getUrl();
-    linhas.push('<' + url + '|Abrir a planilha>');
+    resumo.push('<' + SpreadsheetApp.getActiveSpreadsheet().getUrl() + '|Abrir a planilha>');
   } catch (erro) {
     // sem link: segue sem ele
   }
 
+  // ── Todas as respostas, na ordem do formulário ──
+  var respostas = ['*Respostas completas* — ' + (organizacao || payload.protocolo || '')];
+  for (var i = 0; i < headers.length; i++) {
+    var pergunta = String(headers[i] || '');
+    var resposta = String(row[i] === undefined || row[i] === null ? '' : row[i]).trim();
+
+    if (!pergunta || !resposta) continue; // pergunta da outra trilha, ou não respondida
+    if (COLUNAS_FORA_DA_LISTA.indexOf(pergunta) !== -1) continue;
+    if (typeof COLUNAS_AVALIACAO !== 'undefined' && COLUNAS_AVALIACAO.indexOf(pergunta) !== -1) continue;
+
+    if (resposta.length > 500) resposta = resposta.slice(0, 500) + '…';
+    respostas.push('*' + pergunta + '*\n' + resposta);
+  }
+
+  var partes = quebrarEmMensagens([resumo.join('\n')].concat(respostas.join('\n\n')));
+  for (var p = 0; p < partes.length; p++) {
+    enviarAoChat(partes[p], payload.protocolo || '');
+  }
+}
+
+/**
+ * Divide o conteúdo em mensagens que caibam no limite do Chat, quebrando
+ * entre parágrafos para nunca cortar uma resposta ao meio.
+ */
+function quebrarEmMensagens(blocos) {
+  var mensagens = [];
+  for (var b = 0; b < blocos.length; b++) {
+    var paragrafos = String(blocos[b]).split('\n\n');
+    var atual = '';
+    for (var i = 0; i < paragrafos.length; i++) {
+      var pedaco = paragrafos[i];
+      if (atual && (atual.length + pedaco.length + 2) > LIMITE_CHAT) {
+        mensagens.push(atual);
+        atual = pedaco;
+      } else {
+        atual = atual ? atual + '\n\n' + pedaco : pedaco;
+      }
+    }
+    if (atual) mensagens.push(atual);
+  }
+  return mensagens;
+}
+
+/** Publica uma mensagem, agrupando pelo protocolo na mesma conversa. */
+function enviarAoChat(texto, chaveDaConversa) {
   try {
-    UrlFetchApp.fetch(CHAT_WEBHOOK, {
+    var separador = CHAT_WEBHOOK.indexOf('?') === -1 ? '?' : '&';
+    var url = CHAT_WEBHOOK;
+    if (chaveDaConversa) {
+      url += separador + 'threadKey=' + encodeURIComponent(chaveDaConversa) +
+        '&messageReplyOption=REPLY_MESSAGE_FALLBACK_TO_NEW_THREAD';
+    }
+    UrlFetchApp.fetch(url, {
       method: 'post',
       contentType: 'application/json; charset=UTF-8',
-      payload: JSON.stringify({ text: linhas.join('\n') }),
+      payload: JSON.stringify({ text: texto }),
       muteHttpExceptions: true,
     });
   } catch (erro) {
