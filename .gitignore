@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Cópia local do script do Apps Script, com a URL do webhook já preenchida.
+# Nunca versionar: o repositório é público e a URL dá acesso de escrita ao
+# espaço do Google Chat.
+.env.txt
+COSMMUS-script-completo*.gs
+*.gs.local
