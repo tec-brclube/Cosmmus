@@ -182,6 +182,7 @@ function onOpen() {
     .addItem('Atualizar painel', 'criarPainel')
     .addItem('Recalcular respostas', 'recalcularRespostas')
     .addSeparator()
+    .addItem('Configurar avisos (URL do Chat)', 'configurarAvisos')
     .addItem('Testar avisos (e-mail e Chat)', 'testarAvisos')
     .addItem('Reenviar aviso de um protocolo', 'pedirProtocoloEReenviar')
     .addToUi();
@@ -203,4 +204,46 @@ function pedirProtocoloEReenviar() {
     return;
   }
   ui.alert(reenviarAviso(protocolo));
+}
+
+/**
+ * Pede a URL do webhook do Chat e guarda nas Propriedades do Script.
+ *
+ * Guardar fora do código é o que faz a configuração sobreviver: atualizar o
+ * script depois disso não apaga mais nada.
+ */
+function configurarAvisos() {
+  var ui = SpreadsheetApp.getUi();
+  var atual = obterConfig('CHAT_WEBHOOK', '');
+
+  var resposta = ui.prompt(
+    'Configurar avisos',
+    atual
+      ? 'Já existe uma URL do Google Chat configurada (' + atual.length + ' caracteres).\n\n' +
+        'Cole uma nova para substituir, ou escreva REMOVER para desligar o aviso no Chat:'
+      : 'Cole a URL do webhook do Google Chat:\n\n' +
+        '(No espaço do Chat: Apps e integrações → Webhooks → copiar URL)',
+    ui.ButtonSet.OK_CANCEL,
+  );
+  if (resposta.getSelectedButton() !== ui.Button.OK) return;
+
+  var valor = resposta.getResponseText().trim();
+  if (!valor) {
+    ui.alert('Nada informado. A configuração atual foi mantida.');
+    return;
+  }
+
+  if (valor.toUpperCase() === 'REMOVER') {
+    PropertiesService.getScriptProperties().deleteProperty('CHAT_WEBHOOK');
+    ui.alert('Aviso no Chat desligado.');
+    return;
+  }
+
+  if (valor.indexOf('https://chat.googleapis.com/') !== 0) {
+    ui.alert('Isso não parece uma URL de webhook do Google Chat.\n\nEla começa com https://chat.googleapis.com/ — confira e tente de novo.');
+    return;
+  }
+
+  definirConfig('CHAT_WEBHOOK', valor);
+  ui.alert('URL salva. Ela fica nas Propriedades do Script e não se perde ao atualizar o código.\n\nUse "Testar avisos" para conferir.');
 }

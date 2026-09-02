@@ -28,18 +28,48 @@ const ABAS_PERMITIDAS = ['Respostas', 'Diagnostico Cosmmus'];
  * O aviso sai só no envio final — os salvamentos automáticos, que acontecem
  * enquanto a pessoa preenche, não disparam e-mail.
  */
-const NOTIFY_EMAIL = 'marcos@brclube.org,marcos@cosmmus.com';
+const NOTIFY_EMAIL = obterConfig('NOTIFY_EMAIL', 'marcos@brclube.org,marcos@cosmmus.com');
 
 /**
  * Webhook do Google Chat que recebe aviso de formulário concluído.
  *
- * DEIXE VAZIO NO REPOSITÓRIO. A URL contém chave e token de acesso ao espaço
- * do chat: preencha somente aqui no editor do Apps Script, que não é público.
- * Quem tiver a URL consegue publicar mensagens no espaço.
+ * O valor NÃO fica no código: ele mora nas Propriedades do Script
+ * (Configurações do projeto → Propriedades do script), com a chave
+ * CHAT_WEBHOOK. Assim, colar uma versão nova deste arquivo por cima não apaga
+ * a configuração — e a URL, que dá acesso de escrita ao espaço do Chat, não
+ * entra no repositório público.
  *
- * Vazio ('') = não avisa no chat.
+ * Para configurar sem sair da planilha: menu COSMMUS → Configurar avisos.
+ *
+ * A constante abaixo é só uma saída de emergência, para quem preferir fixar no
+ * código. Deixe vazia para usar as Propriedades do Script.
  */
-const CHAT_WEBHOOK = '';
+const CHAT_WEBHOOK_FIXO = '';
+const CHAT_WEBHOOK = obterConfig('CHAT_WEBHOOK', CHAT_WEBHOOK_FIXO);
+
+/**
+ * Lê uma configuração das Propriedades do Script, com valor de reserva.
+ *
+ * É o que permite guardar segredos (a URL do Chat) fora do código: eles ficam
+ * nas configurações do projeto e sobrevivem a qualquer colagem de arquivo.
+ */
+function obterConfig(chave, padrao) {
+  try {
+    var valor = PropertiesService.getScriptProperties().getProperty(chave);
+    return valor ? String(valor).trim() : padrao;
+  } catch (erro) {
+    return padrao; // sem permissão ainda: usa a reserva
+  }
+}
+
+/**
+ * Grava a URL do Chat (e, se quiser, os e-mails) nas Propriedades do Script.
+ * Rode uma vez; depois disso, atualizar o código não mexe mais nisso.
+ */
+function definirConfig(chave, valor) {
+  PropertiesService.getScriptProperties().setProperty(chave, String(valor).trim());
+  console.log(chave + ' salvo nas Propriedades do Script.');
+}
 
 /**
  * Recebe o POST do site e grava ou atualiza a linha do protocolo.
@@ -465,13 +495,19 @@ function testarAvisos() {
   var linhas = ['── Diagnóstico dos avisos ──'];
 
   // 1. A URL do Chat está preenchida?
+  var guardado = obterConfig('CHAT_WEBHOOK', '');
   if (!CHAT_WEBHOOK) {
-    linhas.push('✗ CHAT_WEBHOOK está VAZIO.');
-    linhas.push('  É a causa mais comum: colar o arquivo do repositório apaga a URL,');
-    linhas.push('  porque ela não fica versionada. Cole a URL entre as aspas da linha');
-    linhas.push("  const CHAT_WEBHOOK = '';  — depois salve e implante nova versão.");
+    linhas.push('✗ Nenhuma URL do Chat configurada.');
+    linhas.push('  Configure em: menu COSMMUS → Configurar avisos.');
+    linhas.push('  A URL fica guardada nas Propriedades do Script, então atualizar');
+    linhas.push('  o código depois disso não apaga mais nada.');
   } else {
-    linhas.push('✓ CHAT_WEBHOOK preenchido (' + CHAT_WEBHOOK.length + ' caracteres).');
+    linhas.push('✓ URL do Chat configurada (' + CHAT_WEBHOOK.length + ' caracteres), vinda ' +
+      (guardado ? 'das Propriedades do Script.' : 'da constante CHAT_WEBHOOK_FIXO no código.'));
+    if (!guardado) {
+      linhas.push('  ⚠ Fixada no código: será perdida na próxima vez que o arquivo for colado.');
+      linhas.push('    Use COSMMUS → Configurar avisos para guardá-la em lugar seguro.');
+    }
     if (CHAT_WEBHOOK.indexOf('chat.googleapis.com') === -1) {
       linhas.push('  ⚠ A URL não parece ser de um webhook do Google Chat.');
     }
