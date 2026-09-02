@@ -374,6 +374,98 @@ function enviarAoChat(texto, chaveDaConversa) {
   }
 }
 
+/**
+ * Diagnóstico dos avisos — rode quando algo parar de chegar.
+ *
+ * Confere, em ordem, o que costuma dar errado: a URL do Chat apagada ao colar
+ * o arquivo, a implantação desatualizada e o estado das últimas respostas.
+ * Ao final, dispara uma mensagem de teste no Chat.
+ *
+ * COMO USAR: selecione testarAvisos no menu de funções e clique em Executar.
+ * O resultado aparece no registro de execução, embaixo.
+ */
+function testarAvisos() {
+  var linhas = ['── Diagnóstico dos avisos ──'];
+
+  // 1. A URL do Chat está preenchida?
+  if (!CHAT_WEBHOOK) {
+    linhas.push('✗ CHAT_WEBHOOK está VAZIO.');
+    linhas.push('  É a causa mais comum: colar o arquivo do repositório apaga a URL,');
+    linhas.push('  porque ela não fica versionada. Cole a URL entre as aspas da linha');
+    linhas.push("  const CHAT_WEBHOOK = '';  — depois salve e implante nova versão.");
+  } else {
+    linhas.push('✓ CHAT_WEBHOOK preenchido (' + CHAT_WEBHOOK.length + ' caracteres).');
+    if (CHAT_WEBHOOK.indexOf('chat.googleapis.com') === -1) {
+      linhas.push('  ⚠ A URL não parece ser de um webhook do Google Chat.');
+    }
+  }
+
+  // 2. E o aviso por e-mail?
+  linhas.push(NOTIFY_EMAIL ? '✓ NOTIFY_EMAIL: ' + NOTIFY_EMAIL : '✗ NOTIFY_EMAIL vazio (não avisa por e-mail).');
+
+  // 3. As últimas respostas chegaram, e em que estado?
+  try {
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var aba = ss.getSheetByName('Diagnostico Cosmmus');
+    if (!aba) {
+      linhas.push('✗ Não encontrei a aba "Diagnostico Cosmmus".');
+    } else {
+      var ultima = aba.getLastRow();
+      linhas.push('✓ Aba encontrada, com ' + Math.max(ultima - 1, 0) + ' resposta(s).');
+      if (ultima >= 2) {
+        var cabecalhos = aba.getRange(1, 1, 1, aba.getLastColumn()).getValues()[0];
+        var colStatus = cabecalhos.indexOf('Status') + 1;
+        var colData = cabecalhos.indexOf('Data/hora') + 1;
+        var quantas = Math.min(3, ultima - 1);
+        var recentes = aba.getRange(ultima - quantas + 1, 1, quantas, aba.getLastColumn()).getValues();
+        linhas.push('  Últimas ' + quantas + ':');
+        for (var i = 0; i < recentes.length; i++) {
+          var status = colStatus > 0 ? recentes[i][colStatus - 1] : '?';
+          var data = colData > 0 ? recentes[i][colData - 1] : '?';
+          linhas.push('   · ' + data + ' — ' + status);
+        }
+        linhas.push('  Lembre: o aviso só sai em "Concluído". Formulário abandonado');
+        linhas.push('  no meio fica como "Em preenchimento" e não dispara nada.');
+      }
+    }
+  } catch (erro) {
+    linhas.push('✗ Erro ao ler a planilha: ' + erro);
+  }
+
+  // 4. Envia de fato, e mostra a resposta do Google
+  if (CHAT_WEBHOOK) {
+    try {
+      var resposta = UrlFetchApp.fetch(CHAT_WEBHOOK, {
+        method: 'post',
+        contentType: 'application/json; charset=UTF-8',
+        payload: JSON.stringify({ text: '*Teste do script* — se esta mensagem chegou, o envio pelo Apps Script está funcionando. Pode ignorar.' }),
+        muteHttpExceptions: true,
+      });
+      var codigo = resposta.getResponseCode();
+      linhas.push(codigo === 200
+        ? '✓ Mensagem de teste enviada ao Chat (HTTP 200). Confira o espaço.'
+        : '✗ O Chat recusou: HTTP ' + codigo + ' — ' + resposta.getContentText().slice(0, 300));
+    } catch (erro) {
+      linhas.push('✗ Falha ao chamar o Chat: ' + erro);
+    }
+  }
+
+  linhas.push('');
+  linhas.push('Se tudo acima estiver ✓ e mesmo assim nada chegar quando alguém');
+  linhas.push('preencher o formulário, falta implantar: Implantar → Gerenciar');
+  linhas.push('implantações → editar → Versão: Nova → Implantar. Sem isso o site');
+  linhas.push('continua conversando com a versão antiga do script.');
+
+  var texto = linhas.join('\n');
+  console.log(texto);
+  try {
+    SpreadsheetApp.getUi().alert(texto);
+  } catch (erro) {
+    // rodando pelo editor, sem planilha aberta: o log basta
+  }
+  return texto;
+}
+
 function jsonOutput(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }

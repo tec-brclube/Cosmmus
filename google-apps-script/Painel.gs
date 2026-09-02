@@ -181,5 +181,7 @@ function onOpen() {
     .createMenu('COSMMUS')
     .addItem('Atualizar painel', 'criarPainel')
     .addItem('Recalcular respostas', 'recalcularRespostas')
+    .addSeparator()
+    .addItem('Testar avisos (e-mail e Chat)', 'testarAvisos')
     .addToUi();
 }
