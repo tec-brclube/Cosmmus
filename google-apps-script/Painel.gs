@@ -183,5 +183,24 @@ function onOpen() {
     .addItem('Recalcular respostas', 'recalcularRespostas')
     .addSeparator()
     .addItem('Testar avisos (e-mail e Chat)', 'testarAvisos')
+    .addItem('Reenviar aviso de um protocolo', 'pedirProtocoloEReenviar')
     .addToUi();
+}
+
+/** Pergunta o protocolo e reenvia os avisos daquele formulário. */
+function pedirProtocoloEReenviar() {
+  var ui = SpreadsheetApp.getUi();
+  var resposta = ui.prompt(
+    'Reenviar aviso',
+    'Cole o protocolo do formulário (ex.: DIAG-20260831-AB12):',
+    ui.ButtonSet.OK_CANCEL,
+  );
+  if (resposta.getSelectedButton() !== ui.Button.OK) return;
+
+  var protocolo = resposta.getResponseText().trim();
+  if (!protocolo) {
+    ui.alert('Nenhum protocolo informado.');
+    return;
+  }
+  ui.alert(reenviarAviso(protocolo));
 }

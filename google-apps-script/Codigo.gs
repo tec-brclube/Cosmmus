@@ -123,10 +123,21 @@ function doPost(e) {
       sheet.appendRow(row);
     }
 
-    // Notifica apenas quando o formulário é finalizado
+    /**
+     * Avisos, apenas no envio final.
+     *
+     * Cada um é isolado: uma falha no e-mail (cota do Google estourada,
+     * endereço recusado) não pode impedir o aviso no Chat, nem devolver erro
+     * ao site — a resposta do cliente já está gravada acima, e é o que
+     * importa. As falhas ficam no log de execuções.
+     */
     if (payload.status === 'Concluído') {
-      if (NOTIFY_EMAIL) notify(payload, headers, row, avaliacao);
-      if (CHAT_WEBHOOK) notificarChat(payload, headers, row, avaliacao);
+      tentarAvisar('e-mail', function () {
+        if (NOTIFY_EMAIL) notify(payload, headers, row, avaliacao);
+      });
+      tentarAvisar('Google Chat', function () {
+        if (CHAT_WEBHOOK) notificarChat(payload, headers, row, avaliacao);
+      });
     }
 
     return jsonOutput({
@@ -140,6 +151,72 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+/** Executa um aviso sem deixar que a falha dele derrube o resto. */
+function tentarAvisar(canal, acao) {
+  try {
+    acao();
+  } catch (erro) {
+    console.error('Falha ao avisar por ' + canal + ': ' + erro);
+  }
+}
+
+/**
+ * Reenvia os avisos de um formulário já gravado.
+ *
+ * Serve quando um aviso se perdeu — webhook não configurado na hora, cota de
+ * e-mail estourada, script fora do ar. Os dados são lidos da planilha, então
+ * o aviso sai idêntico ao que teria saído na hora.
+ *
+ * COMO USAR: no editor, troque o protocolo abaixo e execute reenviarAviso.
+ */
+function reenviarAviso(protocolo) {
+  var alvo = protocolo || 'COLE-O-PROTOCOLO-AQUI';
+
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var abas = ['Diagnostico Cosmmus', 'Respostas'];
+
+  for (var a = 0; a < abas.length; a++) {
+    var aba = ss.getSheetByName(abas[a]);
+    if (!aba || aba.getLastRow() < 2) continue;
+
+    var headers = aba.getRange(1, 1, 1, aba.getLastColumn()).getValues()[0];
+    var linha = findRowByProtocol(aba, headers, alvo);
+    if (linha < 1) continue;
+
+    var row = aba.getRange(linha, 1, 1, headers.length).getValues()[0];
+    var payload = {
+      formulario: abas[a] === 'Respostas' ? 'Caracterização Organizacional — Riscos Psicossociais' : 'Diagnóstico Cosmmus',
+      protocolo: alvo,
+      status: 'Concluído',
+      dataHora: row[headers.indexOf('Data/hora')] || '',
+    };
+
+    var avaliacao = null;
+    if (typeof avaliar === 'function') {
+      try {
+        avaliacao = avaliar(headers, row);
+      } catch (erro) {
+        console.error('Não consegui recalcular o IPC: ' + erro);
+      }
+    }
+
+    tentarAvisar('e-mail', function () {
+      if (NOTIFY_EMAIL) notify(payload, headers, row, avaliacao);
+    });
+    tentarAvisar('Google Chat', function () {
+      if (CHAT_WEBHOOK) notificarChat(payload, headers, row, avaliacao);
+    });
+
+    var recado = 'Avisos reenviados para ' + alvo + ' (aba ' + abas[a] + ', linha ' + linha + ').';
+    console.log(recado);
+    return recado;
+  }
+
+  var naoAchei = 'Não encontrei o protocolo ' + alvo + ' em nenhuma das abas.';
+  console.log(naoAchei);
+  return naoAchei;
 }
 
 /** Permite testar a implantação abrindo a URL no navegador. */
