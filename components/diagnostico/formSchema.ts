@@ -20,6 +20,16 @@ const MOMENTOS_INICIAIS = [
   'Está em fase de implantação.',
 ];
 
+/**
+ * Há urgência quando a pessoa escolheu qualquer coisa diferente de "não existe
+ * data específica" — inclusive urgências sem data marcada, que são justamente
+ * as que mais precisam do motivo e da consequência.
+ */
+const temUrgencia = (values: FormValues): boolean => {
+  const resposta = str(values['25']);
+  return resposta !== '' && resposta !== 'Não existe uma data específica.';
+};
+
 /** Trilha A: ideia, iniciativa informal ou implantação. */
 const trilhaInicial = (values: FormValues): boolean => MOMENTOS_INICIAIS.includes(str(values['4']));
 
@@ -484,10 +494,12 @@ export const formSections: SectionDef[] = [
       },
       {
         id: '17',
-        label: 'Se souber, informe os principais sistemas e ferramentas utilizados.',
-        type: 'text',
-        help: 'Opcional. Exemplos: Conta Azul, Omie, SAP, HubSpot, Pipedrive, Trello, Monday, Google Workspace, Microsoft 365, Power BI, ChatGPT.',
-        placeholder: 'Separe por vírgulas',
+        label: 'Quais sistemas vocês usam, e para que serve cada um?',
+        type: 'textGrid',
+        help: 'Preencha os que existirem, do mais importante para o menos. Saber a finalidade de cada sistema evita propor uma ferramenta que vocês já têm.',
+        rows: ['Sistema 1', 'Sistema 2', 'Sistema 3', 'Sistema 4', 'Sistema 5'],
+        columns: ['Nome do sistema', 'Para que serve'],
+        columnPlaceholders: ['Ex.: Conta Azul', 'Ex.: emissão de notas e fluxo de caixa'],
       },
       {
         id: '18',
@@ -668,11 +680,27 @@ export const formSections: SectionDef[] = [
       },
       {
         id: '25.1',
-        label: 'Informe a data e, se desejar, o motivo.',
+        label: 'Se houver uma data, qual?',
+        type: 'date',
+        help: 'Opcional. Deixe em branco se a urgência não tem data marcada.',
+        showIf: temUrgencia,
+      },
+      {
+        id: '25.2',
+        label: 'O que torna este prazo importante?',
+        type: 'text',
+        required: true,
+        showIf: temUrgencia,
+        placeholder: 'Ex.: apresentação ao conselho, renovação de contrato, início da safra',
+      },
+      {
+        id: '25.3',
+        label: 'O que acontece se não for resolvido nesse prazo?',
         type: 'paragraph',
         required: true,
-        showIf: (values) => str(values['25']) === 'Existe uma data específica.',
-        placeholder: 'Ex.: 30/11 — apresentação para o conselho',
+        showIf: temUrgencia,
+        help: 'A consequência ajuda a dimensionar a prioridade e o risco envolvido.',
+        placeholder: 'Ex.: perdemos o contrato; a operação para; a multa começa a correr.',
       },
     ],
   },

@@ -279,6 +279,63 @@ const FormField: React.FC<FieldProps> = ({ field, values, error, onChange, onPat
         );
       }
 
+      case 'date':
+        return (
+          <input
+            id={field.id}
+            type="date"
+            value={stringValue}
+            onChange={(e) => onChange(field.id, e.target.value)}
+            className={`${inputClass} max-w-xs`}
+          />
+        );
+
+      /**
+       * Tabela de texto: uma linha por item, um campo por coluna.
+       * Serve para listar coisas que têm mais de um dado — um sistema e a
+       * finalidade dele, por exemplo — sem virar texto corrido.
+       */
+      case 'textGrid':
+        return (
+          <div className="space-y-3">
+            <div className="hidden md:grid gap-3" style={{ gridTemplateColumns: `repeat(${(field.columns || []).length}, minmax(0, 1fr))` }}>
+              {(field.columns || []).map((column) => (
+                <span key={column} className="text-[11px] font-bold uppercase tracking-widest text-paper-muted">
+                  {column}
+                </span>
+              ))}
+            </div>
+
+            {(field.rows || []).map((row, indiceLinha) => (
+              <div key={row} className="space-y-2 md:space-y-0">
+                <span className="md:hidden text-[11px] font-bold uppercase tracking-widest text-paper-muted">
+                  {row}
+                </span>
+                <div
+                  className="grid gap-3"
+                  style={{ gridTemplateColumns: `repeat(${(field.columns || []).length}, minmax(0, 1fr))` }}
+                >
+                  {(field.columns || []).map((column, indiceColuna) => (
+                    <input
+                      key={column}
+                      type="text"
+                      aria-label={`${row}: ${column}`}
+                      value={recordValue[`${row}|${column}`] || ''}
+                      placeholder={
+                        indiceLinha === 0
+                          ? (field.columnPlaceholders || [])[indiceColuna] || column
+                          : ''
+                      }
+                      onChange={(e) => onPatch(field.id, `${row}|${column}`, e.target.value)}
+                      className={inputClass}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        );
+
       case 'grid':
         return (
           <div className="space-y-3">

@@ -17,7 +17,9 @@ export type FieldType =
   | 'radio'
   | 'checkbox'
   | 'scale'
+  | 'date'
   | 'grid'
+  | 'textGrid'
   | 'numberGroup'
   | 'consent';
 
@@ -36,10 +38,12 @@ export interface FieldDef {
   options?: string[];
   /** Exibe campo de texto livre quando a opção "Outro/Outra/Outros" é marcada. */
   allowOther?: boolean;
-  /** Linhas de uma grade ou de um grupo numérico. */
+  /** Linhas de uma grade, de uma tabela de texto ou de um grupo numérico. */
   rows?: string[];
-  /** Colunas de uma grade de múltipla escolha. */
+  /** Colunas de uma grade de múltipla escolha ou de uma tabela de texto. */
   columns?: string[];
+  /** Texto de exemplo por coluna, em tabelas de texto. */
+  columnPlaceholders?: string[];
   /** Título da primeira coluna de uma grade. */
   rowHeader?: string;
   /** Limite de opções marcáveis em caixas de seleção. */
@@ -101,7 +105,13 @@ export const META_HEADERS = ['Data/hora', 'Protocolo', 'Status', 'Última atuali
 export const buildHeaders = (sections: SectionDef[]): string[] => {
   const headers = [...META_HEADERS];
   for (const field of collectFields(sections)) {
-    if (field.type === 'grid' || field.type === 'numberGroup') {
+    if (field.type === 'textGrid') {
+      for (const row of field.rows || []) {
+        for (const column of field.columns || []) {
+          headers.push(`${field.id} ${field.label} [${row} · ${column}]`);
+        }
+      }
+    } else if (field.type === 'grid' || field.type === 'numberGroup') {
       for (const row of field.rows || []) {
         headers.push(`${field.id} ${field.label} [${row}]`);
       }
@@ -120,7 +130,17 @@ export const buildRow = (sections: SectionDef[], values: FormValues, meta: RowMe
   const row: string[] = [meta.createdAt, meta.protocol, meta.status, meta.updatedAt, meta.progress];
   for (const field of collectFields(sections)) {
     const value = values[field.id];
-    if (field.type === 'grid' || field.type === 'numberGroup') {
+    if (field.type === 'textGrid') {
+      const record = (value && typeof value === 'object' && !Array.isArray(value) ? value : {}) as Record<
+        string,
+        string
+      >;
+      for (const rowLabel of field.rows || []) {
+        for (const column of field.columns || []) {
+          row.push(record[`${rowLabel}|${column}`] ?? '');
+        }
+      }
+    } else if (field.type === 'grid' || field.type === 'numberGroup') {
       const record = (value && typeof value === 'object' && !Array.isArray(value) ? value : {}) as Record<
         string,
         string

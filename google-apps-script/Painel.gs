@@ -127,6 +127,7 @@ function criarPainel() {
 
   // ── Alertas ──
   var alertas = [
+    'Acúmulo funcional',
     'Alerta financeiro',
     'Alerta de tecnologia e dados',
     'Alerta documental',

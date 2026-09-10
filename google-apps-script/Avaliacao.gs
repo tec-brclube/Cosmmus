@@ -64,6 +64,16 @@ var NIVEIS = [
   },
 ];
 
+/**
+ * Acúmulo funcional: equipe pequena cobrindo muitas áreas.
+ * Poucas pessoas respondendo por muitas frentes é sinal de sobrecarga — e de
+ * que o projeto vai esbarrar na agenda das mesmas pessoas o tempo todo.
+ */
+var ACUMULO_FUNCIONAL = {
+  ateQuantasPessoas: 5,
+  aPartirDeQuantasAreas: 5,
+};
+
 /** Multiplicador de preço conforme a nota de urgência. */
 var FATOR_URGENCIA = { 1: 1, 2: 1, 3: 1.1, 4: 1.2 };
 
@@ -208,10 +218,33 @@ var ENTREGAVEIS = {
   ],
 };
 
+/**
+ * Áreas que o diagnóstico passa a recomendar quando as respostas mostram a
+ * necessidade, mesmo que o cliente não as tenha marcado na pergunta 22.
+ *
+ * Existe para corrigir um ponto cego: quem marca só "Pessoas" costuma estar
+ * descrevendo o sintoma, não a causa. Se a maturidade de processos está baixa,
+ * o trabalho vai passar por processos — e o dimensionamento precisa refletir
+ * isso.
+ */
+var AREAS = {
+  estrategia: 'Estratégia e modelo de negócio.',
+  planejamento: 'Planejamento.',
+  governanca: 'Gestão e governança.',
+  financeiro: 'Financeiro.',
+  estrutura: 'Estrutura organizacional.',
+  pessoas: 'Pessoas.',
+  processos: 'Processos e procedimentos.',
+  tecnologia: 'Tecnologia e sistemas.',
+  dados: 'Dados e indicadores.',
+};
+
 /** Colunas que o modelo acrescenta à direita das respostas. */
 var COLUNAS_AVALIACAO = [
   'IPC (9-36)',
   'Nível',
+  'Áreas recomendadas pelo diagnóstico',
+  'Outros alertas',
   'Porte',
   'Maturidade organizacional',
   'Maturidade financeira',
@@ -273,6 +306,62 @@ function contem(resposta, trecho) {
 }
 
 /**
+ * Áreas que o diagnóstico recomenda, além das que o cliente marcou.
+ *
+ * Cada regra parte de uma evidência nas respostas, não de uma suposição: nota
+ * 3 ou 4 numa dimensão significa que aquela frente vai dar trabalho. Áreas já
+ * marcadas pelo cliente são omitidas, para a lista mostrar só o que ele ainda
+ * não enxergou.
+ */
+function areasRecomendadas(sinais) {
+  var sugeridas = [];
+
+  var sugerir = function (area) {
+    if (sugeridas.indexOf(area) === -1) sugeridas.push(area);
+  };
+
+  // Processos frouxos ou responsabilidades indefinidas
+  if (sinais.maturidadeOrg >= 3) {
+    sugerir(AREAS.processos);
+    sugerir(AREAS.estrutura);
+    if (sinais.maturidadeOrg === 4) sugerir(AREAS.governanca);
+  }
+
+  // Controles financeiros frágeis
+  if (sinais.maturidadeFin >= 3) sugerir(AREAS.financeiro);
+
+  // Sistemas que não conversam, ou controle em planilha
+  if (sinais.tecnologia >= 3) {
+    sugerir(AREAS.tecnologia);
+    sugerir(AREAS.dados);
+  }
+
+  // Informação dispersa: quem não acha o dado não consegue decidir
+  if (sinais.qualidadeInfo >= 3) sugerir(AREAS.dados);
+
+  // Organização grande sem estrutura clara
+  if (sinais.porte >= 3) sugerir(AREAS.estrutura);
+
+  // Poucas pessoas cobrindo muitas frentes
+  if (sinais.acumuloFuncional) {
+    sugerir(AREAS.pessoas);
+    sugerir(AREAS.estrutura);
+    sugerir(AREAS.processos);
+  }
+
+  // Reestruturação mexe com o modelo do negócio, não só com a operação
+  if (contem(sinais.objetivos, 'Reorganizar ou reestruturar a organização')) {
+    sugerir(AREAS.estrategia);
+    sugerir(AREAS.governanca);
+  }
+
+  // O que o cliente já marcou não precisa ser recomendado de novo
+  return sugeridas.filter(function (area) {
+    return !contem(sinais.jaMarcadas, area);
+  });
+}
+
+/**
  * Calcula as nove dimensões, o IPC e a faixa de preço de uma resposta.
  * Devolve os valores na ordem de COLUNAS_AVALIACAO.
  */
@@ -307,13 +396,42 @@ function avaliar(headers, row) {
     contem(ferramentas, 'Nenhuma ferramenta estruturada atualmente') ? 3 : 1,
   ]);
 
-  // ── 5. Amplitude do escopo: quantas áreas precisam ser trabalhadas ──
+  // ── Sobrecarga: poucas pessoas para muitas áreas já existentes ──
+  var pessoasNaOperacao = maiorDe([
+    pontuar(PONTOS.ideiaPessoas, r('8A'), 0),
+    pontuar(PONTOS.operacaoPessoas, r('7B'), 0),
+  ]);
+  var areasExistentes = quantasMarcadas(r('10B'));
+  var equipePequena =
+    r('7B') === '1 pessoa.' || r('7B') === '2 a 5 pessoas.' ||
+    r('8A') === 'Não, apenas eu.' || r('8A') === 'Sim, mais 1 pessoa.' || r('8A') === 'Sim, entre 2 e 5 pessoas.';
+  var acumuloFuncional = equipePequena && areasExistentes >= ACUMULO_FUNCIONAL.aPartirDeQuantasAreas;
+
+  /**
+   * ── 5. Amplitude do escopo ──
+   *
+   * Conta as áreas marcadas pelo cliente MAIS as que o diagnóstico recomenda.
+   * Quem marca só "Pessoas" mas descreve processos indefinidos e finanças
+   * frágeis tem, na prática, um escopo maior do que imagina — e o modelo mede
+   * esforço real, não percepção.
+   */
   var areasEscopo = r('22');
+  var recomendadas = areasRecomendadas({
+    maturidadeOrg: maturidadeOrg,
+    maturidadeFin: maturidadeFin,
+    tecnologia: tecnologia,
+    qualidadeInfo: qualidadeInfo,
+    porte: porte,
+    acumuloFuncional: acumuloFuncional,
+    objetivos: r('5'),
+    jaMarcadas: areasEscopo,
+  });
+
   var amplitude;
   if (contem(areasEscopo, 'Ainda não sabemos exatamente')) {
     amplitude = 4; // escopo indefinido é o mais caro de dimensionar
   } else {
-    var quantas = quantasMarcadas(areasEscopo);
+    var quantas = quantasMarcadas(areasEscopo) + recomendadas.length;
     amplitude = quantas === 0 ? 1 : quantas <= 2 ? 1 : quantas <= 4 ? 2 : quantas <= 7 ? 3 : 4;
   }
 
@@ -351,14 +469,22 @@ function avaliar(headers, row) {
   var precoMin = Math.max(Math.round(nivel.horasMin * multiplicador), PARAMETROS.valorMinimo);
   var precoMax = Math.max(Math.round(nivel.horasMax * multiplicador), PARAMETROS.valorMinimo);
 
-  // Alerta: o ponto que mais pesa quando alguma nota estourou
-  var alerta = 'Sem alerta crítico';
-  if (maturidadeFin === 4) alerta = 'Alerta financeiro';
-  else if (tecnologia === 4) alerta = 'Alerta de tecnologia e dados';
-  else if (qualidadeInfo === 4) alerta = 'Alerta documental';
-  else if (urgencia === 4) alerta = 'Alerta de urgência';
-  else if (amplitude === 4) alerta = 'Alerta de escopo';
-  else if (disponibilidade === 4) alerta = 'Alerta de disponibilidade';
+  /**
+   * Alertas. O principal fica numa coluna só, para o painel conseguir contar;
+   * os demais vão para "Outros alertas", porque um caso costuma ter mais de um
+   * problema e esconder os secundários dá uma leitura otimista demais.
+   */
+  var todosAlertas = [];
+  if (acumuloFuncional) todosAlertas.push('Acúmulo funcional');
+  if (maturidadeFin === 4) todosAlertas.push('Alerta financeiro');
+  if (tecnologia === 4) todosAlertas.push('Alerta de tecnologia e dados');
+  if (qualidadeInfo === 4) todosAlertas.push('Alerta documental');
+  if (urgencia === 4) todosAlertas.push('Alerta de urgência');
+  if (amplitude === 4) todosAlertas.push('Alerta de escopo');
+  if (disponibilidade === 4) todosAlertas.push('Alerta de disponibilidade');
+
+  var alerta = todosAlertas.length > 0 ? todosAlertas[0] : 'Sem alerta crítico';
+  var outrosAlertas = todosAlertas.slice(1).join(' · ');
 
   return {
     ipc: ipc,
@@ -366,9 +492,12 @@ function avaliar(headers, row) {
     alerta: alerta,
     precoMin: precoMin,
     precoMax: precoMax,
+    recomendadas: recomendadas,
     valores: [
       ipc,
       nivel.nome,
+      recomendadas.join('; '),
+      outrosAlertas,
       porte,
       maturidadeOrg,
       maturidadeFin,
