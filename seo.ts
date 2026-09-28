@@ -74,6 +74,11 @@ const VIEW_SEO: Partial<Record<ViewState, SeoEntry>> = {
     description:
       'Fale com a COSMMUS Business e agende uma reunião estratégica para desenhar o próximo ciclo da sua empresa.',
   },
+  coop: {
+    title: 'Cosmmus Coop | Consultoria para Cooperativas | COSMMUS Business',
+    description:
+      'Apoiamos cooperativas da constituição à expansão: governança, planejamento, gestão econômica e educação cooperativista, com gestão que respeita a autogestão.',
+  },
   diagnostico: {
     title: 'Diagnóstico Cosmmus | COSMMUS Business',
     description:

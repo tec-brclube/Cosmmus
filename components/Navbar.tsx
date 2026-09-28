@@ -46,6 +46,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
   const [isFormsOpen, setIsFormsOpen] = useState(false);
   const formsRef = useRef<HTMLDivElement>(null);
 
+  // A página da Cosmmus Coop pertence a Áreas de Atuação
+  const activeView: ViewState = currentView === 'coop' ? 'services' : currentView;
+
   const handleNav = (view: ViewState) => {
     onChangeView(view);
     setIsOpen(false);
@@ -112,9 +115,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
                 <a
                   key={item.value}
                   {...linkProps(item.value)}
-                  aria-current={currentView === item.value ? 'page' : undefined}
+                  aria-current={activeView === item.value ? 'page' : undefined}
                   className={`px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 ${
-                    currentView === item.value
+                    activeView === item.value
                       ? 'text-brand-dark bg-white shadow-[0_0_20px_rgba(255,255,255,0.3)]'
                       : 'text-white/85 hover:text-white hover:bg-white/5'
                   }`}
@@ -156,9 +159,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
                         key={item.value}
                         {...linkProps(item.value)}
                         role="menuitem"
-                        aria-current={currentView === item.value ? 'page' : undefined}
+                        aria-current={activeView === item.value ? 'page' : undefined}
                         className={`block px-5 py-4 border-t border-white/5 transition-colors ${
-                          currentView === item.value ? 'bg-white/10' : 'hover:bg-white/5'
+                          activeView === item.value ? 'bg-white/10' : 'hover:bg-white/5'
                         }`}
                       >
                         <span className="block text-sm font-bold text-white leading-tight">{item.label}</span>
@@ -198,7 +201,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
                 key={item.value}
                 {...linkProps(item.value)}
                 className={`block w-full text-left px-4 py-4 mb-2 rounded-xl border transition-all duration-300 ${
-                  currentView === item.value
+                  activeView === item.value
                     ? 'gradient-btn text-white border-transparent'
                     : 'border-brand-pink/60 text-white hover:bg-brand-pink'
                 }`}
@@ -213,9 +216,9 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView }) => {
                 <a
                   key={item.value}
                   {...linkProps(item.value)}
-                  aria-current={currentView === item.value ? 'page' : undefined}
+                  aria-current={activeView === item.value ? 'page' : undefined}
                   className={`block w-full text-left px-3 py-4 rounded-md text-base font-medium border-b border-white/5 last:border-0 ${
-                    currentView === item.value
+                    activeView === item.value
                       ? 'text-white bg-white/10 pl-6'
                       : 'text-white/85 hover:text-white hover:pl-4'
                   } transition-all duration-300`}

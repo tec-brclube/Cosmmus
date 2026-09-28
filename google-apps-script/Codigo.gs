@@ -14,12 +14,16 @@
  * Aba usada quando o site não informa uma. Cada formulário grava na sua
  * própria aba (campo "aba" do envio), criada automaticamente na primeira
  * resposta: 'Respostas' para a caracterização organizacional e
- * 'Diagnostico Cosmmus' para o formulário de diagnóstico.
+ * 'Diagnostico Cosmmus' para o formulário de diagnóstico e 'Cosmmus Coop' para
+ * o contato da página /cosmmus-coop.
  */
 const SHEET_PADRAO = 'Respostas';
 
 /** Evita que um envio adulterado crie abas com nomes estranhos. */
-const ABAS_PERMITIDAS = ['Respostas', 'Diagnostico Cosmmus'];
+const ABAS_PERMITIDAS = ['Respostas', 'Diagnostico Cosmmus', 'Cosmmus Coop'];
+
+/** Abas de contato simples, sem o modelo de dimensionamento (IPC). */
+const ABAS_SEM_AVALIACAO = ['Cosmmus Coop'];
 
 /**
  * Quem recebe aviso quando um formulário é CONCLUÍDO. Vários endereços,
@@ -92,7 +96,11 @@ function doPost(e) {
      * do modelo ficam em branco.
      */
     let avaliacao = null;
-    if (payload.status === 'Concluído' && typeof avaliar === 'function') {
+    if (
+      payload.status === 'Concluído' &&
+      ABAS_SEM_AVALIACAO.indexOf(payload.aba) === -1 &&
+      typeof avaliar === 'function'
+    ) {
       try {
         avaliacao = avaliar(incomingHeaders, incomingRow);
         for (let a = 0; a < COLUNAS_AVALIACAO.length; a++) {
@@ -205,7 +213,12 @@ function reenviarAviso(protocolo) {
   var alvo = protocolo || 'COLE-O-PROTOCOLO-AQUI';
 
   var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var abas = ['Diagnostico Cosmmus', 'Respostas'];
+  var abas = ['Diagnostico Cosmmus', 'Respostas', 'Cosmmus Coop'];
+  var nomes = {
+    'Diagnostico Cosmmus': 'Diagnóstico Cosmmus',
+    Respostas: 'Caracterização Organizacional — Riscos Psicossociais',
+    'Cosmmus Coop': 'Cosmmus Coop',
+  };
 
   for (var a = 0; a < abas.length; a++) {
     var aba = ss.getSheetByName(abas[a]);
@@ -217,14 +230,14 @@ function reenviarAviso(protocolo) {
 
     var row = aba.getRange(linha, 1, 1, headers.length).getValues()[0];
     var payload = {
-      formulario: abas[a] === 'Respostas' ? 'Caracterização Organizacional — Riscos Psicossociais' : 'Diagnóstico Cosmmus',
+      formulario: nomes[abas[a]],
       protocolo: alvo,
       status: 'Concluído',
       dataHora: row[headers.indexOf('Data/hora')] || '',
     };
 
     var avaliacao = null;
-    if (typeof avaliar === 'function') {
+    if (ABAS_SEM_AVALIACAO.indexOf(abas[a]) === -1 && typeof avaliar === 'function') {
       try {
         avaliacao = avaliar(headers, row);
       } catch (erro) {
@@ -303,13 +316,15 @@ function notify(payload, headers, row, avaliacao) {
     '1.2 Nome fantasia',
     '1.1 Razão social',
     '2 Nome da empresa, organização, projeto ou iniciativa',
+    '2 Cooperativa',
   ]);
   const responsavel = primeiroDe([
     '2.1 Nome completo',
     '1 Nome da pessoa responsável pelo preenchimento',
+    '1 Nome',
   ]);
-  const email = primeiroDe(['2.4 E-mail profissional', 'C1 E-mail para contato']);
-  const telefone = primeiroDe(['2.5 Telefone ou WhatsApp', 'C2 WhatsApp']);
+  const email = primeiroDe(['2.4 E-mail profissional', 'C1 E-mail para contato', '6 E-mail']);
+  const telefone = primeiroDe(['2.5 Telefone ou WhatsApp', 'C2 WhatsApp', '5 WhatsApp']);
 
   MailApp.sendEmail({
     to: NOTIFY_EMAIL,
@@ -384,19 +399,22 @@ function notificarChat(payload, headers, row, avaliacao) {
     '1.2 Nome fantasia',
     '1.1 Razão social',
     '2 Nome da empresa, organização, projeto ou iniciativa',
+    '2 Cooperativa',
   ]);
-  var responsavel = primeiroDe(['2.1 Nome completo', '1 Nome da pessoa responsável pelo preenchimento']);
-  var email = primeiroDe(['2.4 E-mail profissional', 'C1 E-mail para contato']);
-  var telefone = primeiroDe(['2.5 Telefone ou WhatsApp', 'C2 WhatsApp']);
+  var responsavel = primeiroDe(['2.1 Nome completo', '1 Nome da pessoa responsável pelo preenchimento', '1 Nome']);
+  var email = primeiroDe(['2.4 E-mail profissional', 'C1 E-mail para contato', '6 E-mail']);
+  var telefone = primeiroDe(['2.5 Telefone ou WhatsApp', 'C2 WhatsApp', '5 WhatsApp']);
   var instagram = porInicio('C3 ');
-  var segmento = porInicio('2.1 Qual é o segmento');
-  var cidade = porInicio('2.2 Em qual cidade');
+  var segmento = porInicio('2.1 Qual é o segmento') || valueOf('3 Ramo');
+  var cidade = porInicio('2.2 Em qual cidade') || valueOf('4 Cidade e UF');
+  var procura = valueOf('7 O que você procura?');
 
   // ── Resumo, para decidir sem abrir nada ──
   var resumo = ['*Novo formulário concluído* — ' + (payload.formulario || '')];
   if (organizacao) resumo.push('*Organização:* ' + organizacao);
   if (segmento) resumo.push('*Segmento:* ' + segmento);
   if (cidade) resumo.push('*Cidade:* ' + cidade);
+  if (procura) resumo.push('*Procura:* ' + procura);
   if (responsavel) resumo.push('*Responsável:* ' + responsavel);
   if (email) resumo.push('*E-mail:* ' + email);
   if (telefone) resumo.push('*WhatsApp:* ' + telefone);

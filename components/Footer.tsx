@@ -62,6 +62,7 @@ const Footer: React.FC<FooterProps> = ({ onViewChange }) => {
               <h4 className="text-white font-bold mb-6 uppercase tracking-widest text-xs">Soluções</h4>
               <ul className="space-y-4 text-sm text-white/85">
                 <li><a href={pathFromView('services', null)} onClick={(event) => handleNav(event, 'services')} className="hover:text-brand-cyan transition-colors">Consultoria</a></li>
+                <li><a href={pathFromView('coop', null)} onClick={(event) => handleNav(event, 'coop')} className="hover:text-brand-cyan transition-colors">Cosmmus Coop</a></li>
                 <li><a href={pathFromView('services', null)} onClick={(event) => handleNav(event, 'services')} className="hover:text-brand-cyan transition-colors">Finanças & Vórtex</a></li>
                 <li><a href={pathFromView('services', null)} onClick={(event) => handleNav(event, 'services')} className="hover:text-brand-cyan transition-colors">Sustentabilidade</a></li>
                 <li><a href={pathFromView('services', null)} onClick={(event) => handleNav(event, 'services')} className="hover:text-brand-cyan transition-colors">Treinamentos</a></li>

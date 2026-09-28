@@ -25,6 +25,7 @@ export const ROUTES: Partial<Record<ViewState, string>> = {
   contact: '/contato',
   aplicacao: '/aplicacaocosmmus',
   diagnostico: '/diagnostico',
+  coop: '/cosmmus-coop',
 };
 
 /** Prefixo das páginas individuais da equipe: /equipe/<slug> */

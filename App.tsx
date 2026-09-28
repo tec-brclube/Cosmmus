@@ -19,6 +19,7 @@ import ApplicationForm from './components/aplicacao/ApplicationForm';
 import DiagnosticoForm from './components/diagnostico/DiagnosticoForm';
 import Team from './components/equipe/Team';
 import MemberPage from './components/equipe/MemberPage';
+import CoopPage from './components/coop/CoopPage';
 import { applySeo } from './seo';
 import { routeFromPath, pathFromView } from './routes';
 
@@ -61,6 +62,11 @@ const AppContent: React.FC = () => {
   };
 
   const handleViewService = (serviceId: string) => {
+    // A Cosmmus Coop tem página própria, com endereço próprio
+    if (serviceId === 'coop-cooperativas') {
+      setCurrentView('coop');
+      return;
+    }
     setCurrentServiceId(serviceId);
     setCurrentView('service-details');
   };
@@ -114,6 +120,8 @@ const AppContent: React.FC = () => {
         return <ApplicationForm />;
       case 'diagnostico':
         return <DiagnosticoForm />;
+      case 'coop':
+        return <CoopPage onViewMember={handleViewMember} onViewTeam={() => setCurrentView('equipe')} />;
       default:
         return <Hero onCtaClick={() => setCurrentView('contact')} />;
     }

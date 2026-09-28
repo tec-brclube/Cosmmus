@@ -10,7 +10,8 @@
     { "source": "/conteudos", "destination": "/index.html" },
     { "source": "/contato", "destination": "/index.html" },
     { "source": "/aplicacaocosmmus", "destination": "/index.html" },
-    { "source": "/diagnostico", "destination": "/index.html" }
+    { "source": "/diagnostico", "destination": "/index.html" },
+    { "source": "/cosmmus-coop", "destination": "/index.html" }
   ],
   "headers": [
     {
