@@ -27,8 +27,8 @@ const Contact: React.FC = () => {
                   <a href="mailto:contato@cosmmus.com" className="text-white/85 hover:text-brand-cyan transition-colors flex items-center gap-2">
                      contato@cosmmus.com
                   </a>
-                  <a href="tel:+5562999546265" className="text-white/85 hover:text-brand-cyan transition-colors flex items-center gap-2">
-                     (62) 99954-6265
+                  <a href="tel:+5511955025629" className="text-white/85 hover:text-brand-cyan transition-colors flex items-center gap-2">
+                     (11) 95502-5629
                   </a>
                 </div>
               </div>

@@ -51,7 +51,7 @@ const SPEC: FormSpec = {
   sections: SECTIONS,
 };
 
-const WHATSAPP_NUMBER = '5562999546265';
+const WHATSAPP_NUMBER = '5511955025629';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 

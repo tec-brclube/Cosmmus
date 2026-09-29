@@ -547,7 +547,7 @@ const FormRunner: React.FC<{ config: FormConfig }> = ({ config }) => {
               <Download size={18} /> Baixar cópia das respostas
             </button>
             <a
-              href="https://wa.me/5562999546265"
+              href="https://wa.me/5511955025629"
               target="_blank"
               rel="noopener noreferrer"
               className="py-4 px-8 rounded-full bg-brand-dark text-white font-bold hover:bg-paper-accent transition-colors shadow-[0_10px_30px_-10px_rgba(23,12,46,0.5)] flex items-center justify-center gap-3"

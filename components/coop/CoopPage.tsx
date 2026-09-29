@@ -327,13 +327,13 @@ const CoopPage: React.FC = () => {
           <div className="absolute bottom-[0%] left-[-8%] w-[460px] h-[460px] rounded-full blur-[140px] opacity-15" style={{ background: GREEN }} />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16 md:py-24 grid lg:grid-cols-[1.15fr_1fr] gap-14 lg:gap-8 items-center">
-          <div>
+        <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-10 pb-20 md:pt-12 md:pb-24 flex flex-col-reverse items-center gap-8 text-center">
+          <div className="flex flex-col items-center">
             <motion.div
               initial={reduce ? false : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.04] backdrop-blur-sm mb-8"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-white/[0.04] backdrop-blur-sm mb-6"
             >
               <span className="w-1.5 h-1.5 rounded-full" style={{ background: GREEN }} />
               <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.12em] sm:tracking-[0.22em] uppercase text-white/80 whitespace-nowrap">
@@ -345,7 +345,7 @@ const CoopPage: React.FC = () => {
               initial={reduce ? false : { opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-              className="text-[2.6rem] sm:text-6xl lg:text-7xl font-extrabold tracking-tighter leading-[0.98] text-white mb-8"
+              className="text-[2.6rem] sm:text-6xl lg:text-7xl font-extrabold tracking-tighter leading-[0.98] text-white mb-6"
             >
               Cooperativismo e estratégia <GradientText>caminham juntos.</GradientText>
             </motion.h1>
@@ -354,7 +354,7 @@ const CoopPage: React.FC = () => {
               initial={reduce ? false : { opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-              className="text-lg md:text-xl text-white/80 leading-relaxed max-w-xl mb-10"
+              className="text-lg md:text-xl text-white/80 leading-relaxed max-w-2xl mb-8"
             >
               Apoiamos cooperativas em todas as etapas da sua jornada, da constituição à expansão, com gestão
               profissional que respeita a autogestão e coloca o cooperado no centro das decisões.
@@ -364,7 +364,7 @@ const CoopPage: React.FC = () => {
               initial={reduce ? false : { opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="flex flex-col sm:flex-row gap-4"
+              className="flex flex-col sm:flex-row justify-center gap-4"
             >
               <button type="button" onClick={() => goToContact('Diagnóstico')} className={primaryButton} style={{ background: GREEN }}>
                 Agende um diagnóstico
@@ -380,7 +380,7 @@ const CoopPage: React.FC = () => {
             initial={reduce ? false : { opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-            className="relative mx-auto w-full max-w-[300px] sm:max-w-[400px] lg:max-w-[440px]"
+            className="relative mx-auto w-full max-w-[150px] sm:max-w-[180px] lg:max-w-[190px]"
           >
             <div
               className="absolute inset-[12%] rounded-full blur-[80px] opacity-40"
@@ -465,20 +465,18 @@ const CoopPage: React.FC = () => {
               return (
                 <div
                   key={front.title}
-                  className="group relative bg-[#06041a]/95 p-8 md:p-9 transition-colors duration-500 hover:bg-[#0b0826]"
+                  className="group relative bg-[#06041a]/95 p-8 md:p-9 text-center transition-colors duration-500 hover:bg-[#0b0826]"
                 >
                   <div
-                    className="absolute inset-x-0 top-0 h-px scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500"
+                    className="absolute inset-x-0 top-0 h-px scale-x-0 group-hover:scale-x-100 transition-transform duration-500"
                     style={{ backgroundImage: GRADIENT }}
                     aria-hidden="true"
                   />
-                  <div className="flex items-start justify-between mb-8">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-white/[0.04] border border-white/[0.06] text-white/80 group-hover:text-white transition-colors">
-                      <Icon size={20} strokeWidth={1.6} />
-                    </div>
-                    <span className="text-sm font-bold tabular-nums text-white/25 group-hover:text-white/60 transition-colors">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
+                  <span className="absolute top-6 right-7 text-sm font-bold tabular-nums text-white/25 group-hover:text-white/60 transition-colors">
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
+                  <div className="w-11 h-11 mx-auto mb-7 rounded-xl flex items-center justify-center bg-white/[0.04] border border-white/[0.06] text-white/80 group-hover:text-white transition-colors">
+                    <Icon size={20} strokeWidth={1.6} />
                   </div>
                   <h3 className="text-lg font-bold text-white tracking-tight mb-3">{front.title}</h3>
                   <p className="text-[15px] text-white/65 leading-relaxed">{front.text}</p>
@@ -505,7 +503,7 @@ const CoopPage: React.FC = () => {
                   as="li"
                   key={step.title}
                   delay={index * 0.08}
-                  className="h-full rounded-2xl border border-white/[0.07] bg-white/[0.02] p-7 relative overflow-hidden"
+                  className="h-full rounded-2xl border border-white/[0.07] bg-white/[0.02] p-7 relative overflow-hidden text-center"
                 >
                     <span
                       className="absolute -right-2 -top-6 text-[110px] font-extrabold leading-none text-white/[0.04] select-none"
@@ -513,7 +511,7 @@ const CoopPage: React.FC = () => {
                     >
                       {index + 1}
                     </span>
-                    <div className="flex items-center gap-3 mb-6">
+                    <div className="relative flex flex-col items-center gap-3 mb-6">
                       <span className="w-9 h-9 rounded-full flex items-center justify-center text-[#03140b]" style={{ background: [GREEN, TEAL, BLUE, VIOLET][index] }}>
                         <Icon size={17} strokeWidth={2} />
                       </span>
@@ -529,9 +527,9 @@ const CoopPage: React.FC = () => {
           {/* Destaque: Oficina de Planejamento 2027 */}
           <Reveal>
             <GradientFrame>
-              <div className="relative overflow-hidden rounded-[calc(1.5rem-1px)] p-8 md:p-14 grid lg:grid-cols-[1fr_auto] xl:grid-cols-[1fr_auto_auto] gap-10 xl:gap-12 items-center">
+              <div className="relative overflow-hidden rounded-[calc(1.5rem-1px)] p-8 md:p-14 flex flex-col items-center gap-12 text-center">
                 <div className="absolute -right-24 -bottom-24 w-[420px] h-[420px] rounded-full blur-[120px] opacity-25 pointer-events-none" style={{ background: VIOLET }} aria-hidden="true" />
-                <div className="relative">
+                <div className="relative flex flex-col items-center">
                   <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold tracking-[0.2em] uppercase text-[#03140b] mb-6" style={{ background: GREEN }}>
                     <CalendarDays size={13} strokeWidth={2.2} />
                     Destaque
@@ -539,7 +537,7 @@ const CoopPage: React.FC = () => {
                   <h3 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">
                     Oficina de Planejamento 2027
                   </h3>
-                  <p className="text-lg text-white/75 leading-relaxed max-w-xl mb-8">
+                  <p className="text-lg text-white/75 leading-relaxed max-w-2xl mb-8">
                     Um encontro com dirigentes, conselheiros e cooperados para sair com prioridades, metas e calendário do
                     próximo ano definidos. Participativa do começo ao fim, como a cooperativa.
                   </p>
@@ -548,24 +546,26 @@ const CoopPage: React.FC = () => {
                     <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                   </button>
                 </div>
-                {/* O "2027" só cabe ao lado do vídeo em telas largas */}
-                <div className="relative hidden xl:flex flex-col items-end" aria-hidden="true">
-                  <GradientText className="text-[130px] font-extrabold tracking-tighter leading-none">2027</GradientText>
-                  <div className="flex gap-2 mt-4">
-                    {['Prioridades', 'Metas', 'Calendário'].map((label) => (
-                      <span key={label} className="px-3 py-1.5 rounded-full border border-white/10 text-xs font-semibold text-white/70">
-                        {label}
-                      </span>
-                    ))}
+                {/* Embaixo do texto: o "2027" ao lado do vídeo; no celular, só o vídeo */}
+                <div className="relative flex items-center justify-center gap-10 lg:gap-14">
+                  <div className="relative hidden md:flex flex-col items-center" aria-hidden="true">
+                    <GradientText className="text-[110px] lg:text-[140px] font-extrabold tracking-tighter leading-none">2027</GradientText>
+                    <div className="flex gap-2 mt-4">
+                      {['Prioridades', 'Metas', 'Calendário'].map((label) => (
+                        <span key={label} className="px-3 py-1.5 rounded-full border border-white/10 text-xs font-semibold text-white/70">
+                          {label}
+                        </span>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <div className="relative w-full max-w-[240px] mx-auto lg:w-[220px] xl:w-[230px]">
-                  <OficinaVideo
-                    src={oficinaVideo}
-                    poster={oficinaPoster}
-                    label="Oficina com cooperados de uma cooperativa de reciclagem"
-                    reduceMotion={!!reduce}
-                  />
+                  <div className="relative w-[220px] sm:w-[240px] shrink-0">
+                    <OficinaVideo
+                      src={oficinaVideo}
+                      poster={oficinaPoster}
+                      label="Oficina com cooperados de uma cooperativa de reciclagem"
+                      reduceMotion={!!reduce}
+                    />
+                  </div>
                 </div>
               </div>
             </GradientFrame>
@@ -580,16 +580,16 @@ const CoopPage: React.FC = () => {
             <PhotoCard src={palestraUeg} alt="Marcos Antonio em palestra na Universidade Estadual de Goiás" caption="Palestra na Universidade Estadual de Goiás" />
           </Reveal>
 
-          <Reveal delay={0.1}>
+          <Reveal delay={0.1} className="text-center flex flex-col items-center">
             <Eyebrow>Educação cooperativista</Eyebrow>
             <SectionTitle className="mb-6">O conhecimento liberta e mobiliza.</SectionTitle>
             <p className="text-lg text-white/70 leading-relaxed mb-8">
               Palestras, cursos e oficinas para assembleias, encontros regionais, universidades, programas de formação e
               eventos do Dia Internacional do Cooperativismo.
             </p>
-            <ul className="border-t border-white/10 mb-10">
+            <ul className="w-full border-t border-white/10 mb-10">
               {themes.map((theme, index) => (
-                <li key={theme} className="flex items-center gap-4 py-4 border-b border-white/10">
+                <li key={theme} className="flex items-center justify-center gap-3 py-4 border-b border-white/10">
                   <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: [GREEN, TEAL, BLUE, '#6a5cf5', VIOLET][index] }} aria-hidden="true" />
                   <span className="text-base md:text-lg font-semibold text-white">{theme}</span>
                 </li>
@@ -611,7 +611,7 @@ const CoopPage: React.FC = () => {
               <PhotoCard src={marcosRetrato} alt="Marcos Antonio da Silva e Silva" caption="Marcos Antonio · Cosmmus Coop" />
             </Reveal>
 
-            <Reveal delay={0.1}>
+            <Reveal delay={0.1} className="text-center">
               <Eyebrow>Quem conduz</Eyebrow>
               <SectionTitle className="mb-8">Experiência de quem ajudou a construir cooperativas.</SectionTitle>
               <div className="space-y-5 text-lg text-white/75 leading-relaxed">
@@ -631,7 +631,7 @@ const CoopPage: React.FC = () => {
 
           {/* Trajetória e o livro */}
           <div className="grid lg:grid-cols-[1.5fr_1fr] gap-12 lg:gap-16 items-start">
-            <div>
+            <div className="text-center">
               <Eyebrow>Trajetória</Eyebrow>
               <ol className="border-t border-white/10">
                 {milestones.map((item, index) => (
@@ -639,7 +639,7 @@ const CoopPage: React.FC = () => {
                     as="li"
                     key={item.title}
                     delay={index * 0.05}
-                    className="grid grid-cols-[3.5rem_1fr] sm:grid-cols-[4.5rem_1fr] gap-4 py-6 border-b border-white/10"
+                    className="flex flex-col items-center gap-1.5 py-6 border-b border-white/10"
                   >
                     <span className="text-lg font-extrabold tabular-nums" style={{ color: MILESTONE_COLORS[index % MILESTONE_COLORS.length] }}>
                       {item.year}
@@ -661,7 +661,7 @@ const CoopPage: React.FC = () => {
                   className="w-full aspect-square object-cover rounded-2xl mb-6"
                   loading="lazy"
                 />
-                <div className="px-1 pb-2">
+                <div className="px-1 pb-2 text-center">
                   <Eyebrow>Livro infantil</Eyebrow>
                   <h3 className="text-xl font-extrabold text-white tracking-tight -mt-2 mb-3">
                     O Dia em que a Terra Voltou a Sorrir!
@@ -715,8 +715,8 @@ const CoopPage: React.FC = () => {
 
       {/* ── 8. Contato ──────────────────────────────────────────────────── */}
       <section id={CONTACT_ID} className="relative py-24 md:py-32 border-t border-white/5 scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[0.9fr_1.1fr] gap-12 lg:gap-20 items-start">
-          <Reveal className="lg:sticky lg:top-32">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center gap-12">
+          <Reveal className="text-center flex flex-col items-center">
             <Eyebrow>Contato</Eyebrow>
             <SectionTitle className="mb-6">
               Vamos conversar sobre <GradientText>a sua cooperativa.</GradientText>
@@ -724,12 +724,12 @@ const CoopPage: React.FC = () => {
             <p className="text-lg text-white/70 leading-relaxed mb-10 max-w-md">
               Conte em que momento a cooperativa está. Respondemos com uma proposta de primeiro passo.
             </p>
-            <div className="space-y-4">
-              <a href="https://wa.me/5562999546265" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-white/80 hover:text-white transition-colors group">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-10">
+              <a href="https://wa.me/5511955025629" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 text-white/80 hover:text-white transition-colors group">
                 <span className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center group-hover:border-white/30 transition-colors">
                   <Phone size={17} />
                 </span>
-                (62) 99954-6265
+                (11) 95502-5629
               </a>
               <a href="mailto:contato@cosmmus.com" className="flex items-center gap-4 text-white/80 hover:text-white transition-colors group">
                 <span className="w-11 h-11 rounded-full border border-white/10 flex items-center justify-center group-hover:border-white/30 transition-colors">
@@ -740,7 +740,7 @@ const CoopPage: React.FC = () => {
             </div>
           </Reveal>
 
-          <Reveal delay={0.1}>
+          <Reveal delay={0.1} className="w-full">
             <CoopContactForm interest={interest} onInterestChange={setInterest} accent={GREEN} />
           </Reveal>
         </div>
