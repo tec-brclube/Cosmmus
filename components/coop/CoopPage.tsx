@@ -3,9 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowDown,
   ArrowRight,
-  BookOpen,
   Calculator,
-  CalendarDays,
   ChartLine,
   ClipboardList,
   FileSignature,
@@ -24,8 +22,11 @@ import {
   Target,
   TrendingUp,
 } from 'lucide-react';
-import { getMemberBySlug } from '../equipe/teamData';
-import { isPlainLeftClick } from '../../routes';
+import marcosRetrato from '../../IMAGENS/img/marcos-retrato.jpg';
+import palestraUeg from '../../IMAGENS/img/marcos-palestra-ueg.jpg';
+import livroCapa from '../../IMAGENS/img/livro-capa.jpg';
+import oficinaPoster from '../../IMAGENS/img/oficina-poster.jpg';
+import oficinaVideo from '../../IMAGENS/vid/oficina-cooperativa.mp4';
 import CoopContactForm, { CoopInterest } from './CoopContactForm';
 
 /**
@@ -37,11 +38,6 @@ import CoopContactForm, { CoopInterest } from './CoopContactForm';
  * histórica do cooperativismo, o roxo é a da Cosmmus.
  * ─────────────────────────────────────────────────────────────────────────────
  */
-
-interface CoopPageProps {
-  onViewMember: (slug: string) => void;
-  onViewTeam: () => void;
-}
 
 /** Paleta da frente Coop, na ordem do degradê. */
 const GREEN = '#19c46e';
@@ -163,7 +159,41 @@ const principles = [
   'Interesse pela comunidade',
 ];
 
-const teamSkills = ['Negócios', 'Finanças', 'Comunicação', 'Cultura', 'Desenvolvimento humano'];
+const milestones = [
+  {
+    year: '2016',
+    title: 'Menção Honrosa, Universidade Federal de Goiás',
+    text: '3º lugar no II Prêmio Extensão e Cultura da UFG com o trabalho “A Educação para Além do Mercado: do Individualismo no Lixão à Solidariedade na Cooperativa”.',
+  },
+  {
+    year: '2017',
+    title: 'Palestrante no XXII Congresso Brasileiro de Economia',
+    text: 'Promovido pelo Conselho Federal de Economia em Belo Horizonte (MG), com o tema “Desenvolvimento econômico, justiça social e democracia”.',
+  },
+  {
+    year: '2017',
+    title: 'Formação em Economia Solidária',
+    text: 'Formação da equipe da Pastoral Social e de grupo de apoio no CENFI, em Aparecida de Goiânia, como coordenador do programa de combate à extrema pobreza da Crisálida.',
+  },
+  {
+    year: '2018',
+    title: 'Palestrante no 20º Festival de Cinema e Vídeo Ambiental',
+    text: 'Roda de conversa sobre coleta seletiva e reciclagem, com o tema “Crisálida: economia solidária e cooperativa de catadores”, em Goiás (GO).',
+  },
+  {
+    year: '2022',
+    title: 'Entrevistado no programa Mundo UFG',
+    text: 'Programa da Universidade Federal de Goiás, com o tema Coletivo Recicla Goiás.',
+  },
+  {
+    year: '2022',
+    title: 'Professor do curso Cooperar para Empreender',
+    text: 'Formação de catadores de materiais recicláveis em Goiânia, em convênio entre o Governo de Goiás, a UFG e a Fundação Rádio e Televisão Educativa e Cultural.',
+  },
+];
+
+/** Os anos da trajetória seguem o degradê, do verde ao roxo. */
+const MILESTONE_COLORS = [GREEN, '#14b487', TEAL, BLUE, '#6a5cf5', VIOLET];
 
 /* ── Peças visuais ─────────────────────────────────────────────────────────── */
 
@@ -247,24 +277,28 @@ const SectionTitle: React.FC<{ children: React.ReactNode; className?: string }> 
   </h2>
 );
 
-/** Moldura de 1px em degradê, usada nos destaques. */
-const GradientFrame: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className = '' }) => (
-  <div className={`rounded-3xl p-px ${className}`} style={{ backgroundImage: GRADIENT }}>
-    <div className="rounded-[calc(1.5rem-1px)] bg-[#07051a] h-full">{children}</div>
-  </div>
+/** Foto em retrato com legenda sobreposta. */
+const PhotoCard: React.FC<{ src: string; alt: string; caption: string }> = ({ src, alt, caption }) => (
+  <figure className="relative aspect-[2/3] overflow-hidden rounded-3xl border border-white/10 bg-white/5 shadow-2xl">
+    <img src={src} alt={alt} className="w-full h-full object-cover" loading="lazy" />
+    <figcaption className="absolute left-4 bottom-4 right-4 sm:right-auto px-4 py-2 rounded-full bg-[#07051a]/85 backdrop-blur border border-[#19c46e]/30 text-xs sm:text-sm font-semibold text-white">
+      {caption}
+    </figcaption>
+  </figure>
 );
 
 const primaryButton =
   'inline-flex items-center justify-center gap-2 px-7 h-14 rounded-full font-bold text-[#03140b] transition-all duration-300 hover:brightness-110 hover:shadow-[0_0_32px_rgba(25,196,110,0.45)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#19c46e]';
 const secondaryButton =
   'inline-flex items-center justify-center gap-2 px-7 h-14 rounded-full font-semibold text-white border border-white/15 hover:border-white/40 hover:bg-white/5 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white';
+const lightButton =
+  'inline-flex items-center justify-center gap-2 px-7 h-14 rounded-full font-bold bg-white text-[#03010a] hover:bg-white/90 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white';
 
 /* ── Página ────────────────────────────────────────────────────────────────── */
 
-const CoopPage: React.FC<CoopPageProps> = ({ onViewMember, onViewTeam }) => {
+const CoopPage: React.FC = () => {
   const reduce = useReducedMotion();
   const [interest, setInterest] = useState<CoopInterest | ''>('');
-  const marcos = getMemberBySlug('marcos-antonio');
 
   const scrollTo = (id: string) =>
     document.getElementById(id)?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
@@ -487,145 +521,144 @@ const CoopPage: React.FC<CoopPageProps> = ({ onViewMember, onViewTeam }) => {
 
           {/* Destaque: Oficina de Planejamento 2027 */}
           <Reveal>
-            <GradientFrame>
-              <div className="relative overflow-hidden rounded-[calc(1.5rem-1px)] p-8 md:p-14 grid lg:grid-cols-[1.4fr_1fr] gap-10 items-center">
-                <div className="absolute -right-24 -bottom-24 w-[420px] h-[420px] rounded-full blur-[120px] opacity-25 pointer-events-none" style={{ background: VIOLET }} aria-hidden="true" />
-                <div className="relative">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold tracking-[0.2em] uppercase text-[#03140b] mb-6" style={{ background: GREEN }}>
-                    <CalendarDays size={13} strokeWidth={2.2} />
-                    Destaque
-                  </div>
-                  <h3 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">
-                    Oficina de Planejamento 2027
-                  </h3>
-                  <p className="text-lg text-white/75 leading-relaxed max-w-xl mb-8">
-                    Um encontro com dirigentes e conselheiros para sair com prioridades, metas e calendário do próximo ano
-                    definidos.
-                  </p>
-                  <button type="button" onClick={() => goToContact('Oficina de Planejamento 2027')} className={`${primaryButton} group`} style={{ background: GREEN }}>
-                    Quero levar para minha cooperativa
-                    <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                  </button>
-                </div>
-                <div className="relative hidden lg:flex flex-col items-end" aria-hidden="true">
-                  <GradientText className="text-[150px] xl:text-[180px] font-extrabold tracking-tighter leading-none">2027</GradientText>
-                  <div className="flex gap-2 mt-4">
-                    {['Prioridades', 'Metas', 'Calendário'].map((label) => (
-                      <span key={label} className="px-3 py-1.5 rounded-full border border-white/10 text-xs font-semibold text-white/70">
-                        {label}
-                      </span>
-                    ))}
-                  </div>
+            <div className="relative overflow-hidden rounded-3xl border border-[#19c46e]/25 bg-gradient-to-br from-[#0a1a16]/80 via-[#07051a]/90 to-[#120a2a]/90 p-8 md:p-14 grid lg:grid-cols-[1.5fr_1fr] gap-10 lg:gap-16 items-center">
+              <div className="absolute -right-24 -bottom-24 w-[420px] h-[420px] rounded-full blur-[120px] opacity-20 pointer-events-none" style={{ background: VIOLET }} aria-hidden="true" />
+              <div className="relative">
+                <Eyebrow>Em destaque</Eyebrow>
+                <h3 className="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">
+                  Oficina de Planejamento 2027
+                </h3>
+                <p className="text-lg text-white/75 leading-relaxed max-w-xl mb-8">
+                  Um encontro com dirigentes, conselheiros e cooperados para sair com prioridades, metas e calendário do
+                  próximo ano definidos. Participativa do começo ao fim, como a cooperativa.
+                </p>
+                <button type="button" onClick={() => goToContact('Oficina de Planejamento 2027')} className={`${primaryButton} group`} style={{ background: GREEN }}>
+                  Quero levar para minha cooperativa
+                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                </button>
+              </div>
+              <div className="relative w-full max-w-[280px] mx-auto lg:mr-0">
+                <div className="aspect-[9/16] overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl">
+                  {/* Sem som e em loop, como uma foto viva; quem pede menos movimento recebe os controles */}
+                  <video
+                    src={oficinaVideo}
+                    poster={oficinaPoster}
+                    className="w-full h-full object-cover"
+                    autoPlay={!reduce}
+                    controls={!!reduce}
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    aria-label="Oficina com cooperados de uma cooperativa de reciclagem"
+                  />
                 </div>
               </div>
-            </GradientFrame>
+            </div>
           </Reveal>
         </div>
       </section>
 
       {/* ── 5. Educação cooperativista ──────────────────────────────────── */}
       <section id={EDUCATION_ID} className="relative py-24 md:py-32 border-t border-white/5 scroll-mt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-14 lg:gap-20 items-start">
-          <Reveal className="lg:sticky lg:top-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[0.8fr_1.2fr] gap-12 lg:gap-16 items-center">
+          <Reveal className="relative max-w-sm mx-auto lg:mx-0 w-full">
+            <PhotoCard src={palestraUeg} alt="Marcos Antonio em palestra na Universidade Estadual de Goiás" caption="Palestra na Universidade Estadual de Goiás" />
+          </Reveal>
+
+          <Reveal delay={0.1}>
             <Eyebrow>Educação cooperativista</Eyebrow>
-            <SectionTitle className="mb-6">
-              O conhecimento <GradientText>liberta e mobiliza.</GradientText>
-            </SectionTitle>
-            <p className="text-lg text-white/70 leading-relaxed mb-10 max-w-lg">
-              Palestras, cursos e oficinas para assembleias, encontros regionais, programas de formação e eventos do Dia
-              Internacional do Cooperativismo.
+            <SectionTitle className="mb-6">O conhecimento liberta e mobiliza.</SectionTitle>
+            <p className="text-lg text-white/70 leading-relaxed mb-8">
+              Palestras, cursos e oficinas para assembleias, encontros regionais, universidades, programas de formação e
+              eventos do Dia Internacional do Cooperativismo.
             </p>
-            <button type="button" onClick={() => goToContact('Palestra ou curso')} className={`${primaryButton} group`} style={{ background: GREEN }}>
+            <ul className="border-t border-white/10 mb-10">
+              {themes.map((theme, index) => (
+                <li key={theme} className="flex items-center gap-4 py-4 border-b border-white/10">
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: [GREEN, TEAL, BLUE, '#6a5cf5', VIOLET][index] }} aria-hidden="true" />
+                  <span className="text-base md:text-lg font-semibold text-white">{theme}</span>
+                </li>
+              ))}
+            </ul>
+            <button type="button" onClick={() => goToContact('Palestra ou curso')} className={`${lightButton} group`}>
               Solicite uma palestra
               <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
             </button>
           </Reveal>
-
-          <div>
-            <p className="text-xs font-bold tracking-[0.2em] uppercase text-white/40 mb-4">Temas</p>
-            <ul className="border-t border-white/10">
-              {themes.map((theme, index) => (
-                <Reveal as="li" key={theme} delay={index * 0.06} className="group flex items-center gap-5 py-6 border-b border-white/10">
-                    <span className="text-sm font-bold tabular-nums w-6 shrink-0" style={{ color: [GREEN, TEAL, BLUE, '#5b63f5', VIOLET][index] }}>
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span className="flex-1 text-lg md:text-xl font-semibold text-white/90">{theme}</span>
-                </Reveal>
-              ))}
-            </ul>
-          </div>
         </div>
       </section>
 
       {/* ── 6. Quem conduz ──────────────────────────────────────────────── */}
       <section className="relative py-24 md:py-32 border-t border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-[0.8fr_1.2fr] gap-12 lg:gap-20 items-center">
-          <Reveal className="relative max-w-sm mx-auto lg:mx-0 w-full">
-            <div className="absolute -inset-6 rounded-[2.5rem] blur-3xl opacity-30" style={{ backgroundImage: GRADIENT }} aria-hidden="true" />
-            <GradientFrame className="relative">
-              <div className="aspect-[4/5] overflow-hidden rounded-[calc(1.5rem-1px)] bg-white/5">
-                {marcos?.photo && (
-                  <img src={marcos.photo} alt="Marcos Antonio, consultor e palestrante da Cosmmus Coop" className="w-full h-full object-cover" loading="lazy" />
-                )}
-              </div>
-            </GradientFrame>
-            <div className="absolute -bottom-5 left-6 right-6 flex items-center gap-3 rounded-2xl bg-[#0b0826]/95 backdrop-blur border border-white/10 px-4 py-3 shadow-2xl">
-              <BookOpen size={18} className="shrink-0" style={{ color: GREEN }} />
-              <p className="text-xs leading-snug text-white/75">
-                Autor de <span className="text-white font-semibold">"O Dia em que a Terra Voltou a Sorrir"</span>
-              </p>
-            </div>
-          </Reveal>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-[0.8fr_1.2fr] gap-12 lg:gap-16 items-center mb-24">
+            <Reveal className="relative max-w-sm mx-auto lg:mx-0 w-full">
+              <PhotoCard src={marcosRetrato} alt="Marcos Antonio da Silva e Silva" caption="Marcos Antonio · Cosmmus Coop" />
+            </Reveal>
 
-          <Reveal delay={0.1}>
-            <Eyebrow>Quem conduz</Eyebrow>
-            <SectionTitle className="mb-8">Experiência de quem ajudou a construir cooperativas.</SectionTitle>
-            <div className="space-y-5 text-lg text-white/75 leading-relaxed mb-10">
-              <p>
-                A Cosmmus Coop é conduzida por <strong className="text-white font-semibold">Marcos Antonio</strong>,
-                consultor e palestrante com trajetória na abertura, gestão e planejamento de cooperativas. Seu trabalho
-                recebeu reconhecimentos e prêmios nacionais e internacionais, e ele é autor do livro infantil "O Dia em
-                que a Terra Voltou a Sorrir", que trata do cooperativismo, e de diversos outros textos sobre cooperação.
-              </p>
-              <p>
-                Ao seu lado, a equipe multidisciplinar da Cosmmus Business, com especialistas em negócios, finanças,
-                comunicação, cultura e desenvolvimento humano.
-              </p>
+            <Reveal delay={0.1}>
+              <Eyebrow>Quem conduz</Eyebrow>
+              <SectionTitle className="mb-8">Experiência de quem ajudou a construir cooperativas.</SectionTitle>
+              <div className="space-y-5 text-lg text-white/75 leading-relaxed">
+                <p>
+                  A Cosmmus Coop é conduzida por Marcos Antonio da Silva e Silva, consultor, professor e palestrante com
+                  trajetória na abertura, gestão e planejamento de cooperativas e em projetos de economia solidária com
+                  cooperativas de catadores. Seu trabalho recebeu reconhecimentos nacionais e internacionais no
+                  cooperativismo.
+                </p>
+                <p>
+                  Ao seu lado, a equipe multidisciplinar da Cosmmus Business, com especialistas em negócios, finanças,
+                  comunicação, cultura e desenvolvimento humano.
+                </p>
+              </div>
+            </Reveal>
+          </div>
+
+          {/* Trajetória e o livro */}
+          <div className="grid lg:grid-cols-[1.5fr_1fr] gap-12 lg:gap-16 items-start">
+            <div>
+              <Eyebrow>Trajetória</Eyebrow>
+              <ol className="border-t border-white/10">
+                {milestones.map((item, index) => (
+                  <Reveal
+                    as="li"
+                    key={item.title}
+                    delay={index * 0.05}
+                    className="grid grid-cols-[3.5rem_1fr] sm:grid-cols-[4.5rem_1fr] gap-4 py-6 border-b border-white/10"
+                  >
+                    <span className="text-lg font-extrabold tabular-nums" style={{ color: MILESTONE_COLORS[index % MILESTONE_COLORS.length] }}>
+                      {item.year}
+                    </span>
+                    <div>
+                      <h3 className="text-base md:text-lg font-bold text-white mb-1.5">{item.title}</h3>
+                      <p className="text-[15px] text-white/65 leading-relaxed">{item.text}</p>
+                    </div>
+                  </Reveal>
+                ))}
+              </ol>
             </div>
-            <div className="flex flex-wrap gap-2 mb-10">
-              {teamSkills.map((skill) => (
-                <span key={skill} className="px-4 py-2 rounded-full bg-white/[0.04] border border-white/10 text-sm text-white/80">
-                  {skill}
-                </span>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-x-8 gap-y-3">
-              <a
-                href="/equipe/marcos-antonio"
-                onClick={(event) => {
-                  if (!isPlainLeftClick(event)) return;
-                  event.preventDefault();
-                  onViewMember('marcos-antonio');
-                }}
-                className="group inline-flex items-center gap-2 font-semibold text-white hover:text-[#19c46e] transition-colors"
-              >
-                Conheça a trajetória de Marcos
-                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </a>
-              <a
-                href="/equipe"
-                onClick={(event) => {
-                  if (!isPlainLeftClick(event)) return;
-                  event.preventDefault();
-                  onViewTeam();
-                }}
-                className="group inline-flex items-center gap-2 font-semibold text-white/70 hover:text-white transition-colors"
-              >
-                Ver a equipe completa
-                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-              </a>
-            </div>
-          </Reveal>
+
+            <Reveal delay={0.1} className="lg:sticky lg:top-32 max-w-sm mx-auto lg:mx-0 w-full">
+              <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 shadow-2xl">
+                <img
+                  src={livroCapa}
+                  alt="Capa do livro O Dia em que a Terra Voltou a Sorrir!"
+                  className="w-full aspect-square object-cover rounded-2xl mb-6"
+                  loading="lazy"
+                />
+                <div className="px-1 pb-2">
+                  <Eyebrow>Livro infantil</Eyebrow>
+                  <h3 className="text-xl font-extrabold text-white tracking-tight -mt-2 mb-3">
+                    O Dia em que a Terra Voltou a Sorrir!
+                  </h3>
+                  <p className="text-sm text-white/65 leading-relaxed">
+                    De Paula Emmanuella Fernandes e Marcos Antônio da Silva e Silva, com ilustrações de Sérgio Neres.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+          </div>
         </div>
       </section>
 

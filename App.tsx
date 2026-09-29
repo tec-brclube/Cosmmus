@@ -121,7 +121,7 @@ const AppContent: React.FC = () => {
       case 'diagnostico':
         return <DiagnosticoForm />;
       case 'coop':
-        return <CoopPage onViewMember={handleViewMember} onViewTeam={() => setCurrentView('equipe')} />;
+        return <CoopPage />;
       default:
         return <Hero onCtaClick={() => setCurrentView('contact')} />;
     }
