@@ -28,6 +28,7 @@ import livroCapa from '../../IMAGENS/img/livro-capa.jpg';
 import oficinaPoster from '../../IMAGENS/img/oficina-poster.jpg';
 import oficinaVideo from '../../IMAGENS/vid/oficina-cooperativa.mp4';
 import CoopContactForm, { CoopInterest } from './CoopContactForm';
+import OficinaVideo from './OficinaVideo';
 
 /**
  * ─────────────────────────────────────────────────────────────────────────────
@@ -538,21 +539,12 @@ const CoopPage: React.FC = () => {
                 </button>
               </div>
               <div className="relative w-full max-w-[280px] mx-auto lg:mr-0">
-                <div className="aspect-[9/16] overflow-hidden rounded-2xl border border-white/10 bg-black shadow-2xl">
-                  {/* Sem som e em loop, como uma foto viva; quem pede menos movimento recebe os controles */}
-                  <video
-                    src={oficinaVideo}
-                    poster={oficinaPoster}
-                    className="w-full h-full object-cover"
-                    autoPlay={!reduce}
-                    controls={!!reduce}
-                    muted
-                    loop
-                    playsInline
-                    preload="metadata"
-                    aria-label="Oficina com cooperados de uma cooperativa de reciclagem"
-                  />
-                </div>
+                <OficinaVideo
+                  src={oficinaVideo}
+                  poster={oficinaPoster}
+                  label="Oficina com cooperados de uma cooperativa de reciclagem"
+                  reduceMotion={!!reduce}
+                />
               </div>
             </div>
           </Reveal>
