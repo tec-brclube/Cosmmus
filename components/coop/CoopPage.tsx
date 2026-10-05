@@ -192,7 +192,7 @@ const principles = [
 
 const milestones = [
   {
-    year: '2016',
+    year: '2017',
     title: 'Menção Honrosa, Universidade Federal de Goiás',
     text: '3º lugar no II Prêmio Extensão e Cultura da UFG com o trabalho “A Educação para Além do Mercado: do Individualismo no Lixão à Solidariedade na Cooperativa”.',
   },
@@ -233,7 +233,7 @@ const awards = [
   {
     photo: fotoMencaoHonrosa,
     alt: 'Marcos Antonio recebe o certificado de Menção Honrosa da UFG',
-    tag: 'UFG · 2016',
+    tag: 'UFG · 2017',
     title: 'Menção Honrosa no II Prêmio Extensão e Cultura',
     text: 'Pelo trabalho “A Educação para Além do Mercado: do Individualismo no Lixão à Solidariedade na Cooperativa”.',
   },

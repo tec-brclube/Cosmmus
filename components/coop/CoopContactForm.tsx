@@ -55,6 +55,32 @@ const WHATSAPP_NUMBER = '5511955025629';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 
+/**
+ * ── Proteção contra robôs ───────────────────────────────────────────────────
+ * Robôs que varrem a internet preenchem formulários sozinhos. Três sinais os
+ * denunciam sem incomodar quem preenche de verdade (nada de "não sou um robô"):
+ *
+ * 1. Campo-isca: um campo invisível que pessoas não veem e robôs preenchem.
+ * 2. Pressa: ninguém preenche o formulário em poucos segundos.
+ * 3. Texto aleatório: palavras longas que alternam maiúsculas e minúsculas no
+ *    meio, como "ixexZKxrCOphjYLjlJMX". Nomes reais têm no máximo uma troca
+ *    dessas ("McDonald").
+ *
+ * Quando um desses sinais aparece, o envio é descartado em silêncio e a tela
+ * mostra a confirmação normal: o robô "acha" que deu certo e não tenta outro
+ * caminho. O Apps Script repete a checagem do texto, para o caso de alguém
+ * mandar direto para a planilha sem passar pela página.
+ */
+const MIN_FILL_MS = 4000;
+
+const looksRandom = (text: string): boolean =>
+  text
+    .trim()
+    .split(/\s+/)
+    .some((word) => word.length >= 8 && (word.match(/[a-zà-ÿ][A-ZÀ-Þ]/g) || []).length >= 2);
+
+const phoneDigits = (phone: string) => phone.replace(/\D/g, '');
+
 interface CoopContactFormProps {
   interest: CoopInterest | '';
   onInterestChange: (interest: CoopInterest) => void;
@@ -71,6 +97,10 @@ const CoopContactForm: React.FC<CoopContactFormProps> = ({ interest, onInterestC
   const [protocol, setProtocol] = useState('');
   const [error, setError] = useState('');
   const confirmationRef = useRef<HTMLDivElement>(null);
+  /** Campo-isca e momento em que o formulário apareceu, para a proteção contra robôs. */
+  const [trap, setTrap] = useState('');
+  const [phoneInvalid, setPhoneInvalid] = useState(false);
+  const shownAt = useRef(Date.now());
 
   // A confirmação é mais curta que o formulário: sem isso, ela ficaria acima da tela
   useEffect(() => {
@@ -106,10 +136,28 @@ const CoopContactForm: React.FC<CoopContactFormProps> = ({ interest, onInterestC
     event.preventDefault();
     if (status === 'sending') return;
 
+    const digits = phoneDigits(fields.whatsapp);
+    if (digits.length < 10 || digits.length > 13) {
+      setPhoneInvalid(true);
+      document.getElementById('coop-whatsapp')?.focus();
+      return;
+    }
+    setPhoneInvalid(false);
+
     const newProtocol = protocol || generateProtocol(SPEC.protocolPrefix);
     setProtocol(newProtocol);
-    setStatus('sending');
     setError('');
+
+    const isBot =
+      trap !== '' ||
+      Date.now() - shownAt.current < MIN_FILL_MS ||
+      [fields.nome, fields.cooperativa, fields.cidade, fields.mensagem].some(looksRandom);
+    if (isBot) {
+      setStatus('sent');
+      return;
+    }
+
+    setStatus('sending');
 
     const result = await saveToSheets(SPEC, toValues(), {
       protocol: newProtocol,
@@ -150,8 +198,14 @@ const CoopContactForm: React.FC<CoopContactFormProps> = ({ interest, onInterestC
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-3xl border border-white/10 bg-[#07051a]/80 backdrop-blur-xl p-6 sm:p-8 md:p-10 space-y-6 shadow-2xl"
+      className="relative rounded-3xl border border-white/10 bg-[#07051a]/80 backdrop-blur-xl p-6 sm:p-8 md:p-10 space-y-6 shadow-2xl"
     >
+      {/* Campo-isca: fora da tela e fora do Tab; só robôs preenchem */}
+      <div className="absolute -left-[9999px] w-px h-px overflow-hidden" aria-hidden="true">
+        <label htmlFor="coop-site">Site</label>
+        <input id="coop-site" name="site" type="text" tabIndex={-1} autoComplete="off" value={trap} onChange={(e) => setTrap(e.target.value)} />
+      </div>
+
       <div className="grid sm:grid-cols-2 gap-5">
         <div>
           <label htmlFor="coop-nome" className={labelClass}>Nome</label>
@@ -181,7 +235,26 @@ const CoopContactForm: React.FC<CoopContactFormProps> = ({ interest, onInterestC
         </div>
         <div>
           <label htmlFor="coop-whatsapp" className={labelClass}>WhatsApp</label>
-          <input id="coop-whatsapp" type="tel" required autoComplete="tel" value={fields.whatsapp} onChange={set('whatsapp')} className={inputClass} placeholder="(00) 00000-0000" />
+          <input
+            id="coop-whatsapp"
+            type="tel"
+            required
+            autoComplete="tel"
+            value={fields.whatsapp}
+            onChange={(event) => {
+              set('whatsapp')(event);
+              setPhoneInvalid(false);
+            }}
+            aria-invalid={phoneInvalid}
+            aria-describedby={phoneInvalid ? 'coop-whatsapp-erro' : undefined}
+            className={`${inputClass} ${phoneInvalid ? '!border-amber-400' : ''}`}
+            placeholder="(00) 00000-0000"
+          />
+          {phoneInvalid && (
+            <p id="coop-whatsapp-erro" className="mt-2 text-sm text-amber-200">
+              Confira o número: informe o WhatsApp com DDD.
+            </p>
+          )}
         </div>
         <div>
           <label htmlFor="coop-email" className={labelClass}>E-mail</label>

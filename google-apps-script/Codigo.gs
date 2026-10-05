@@ -114,6 +114,15 @@ function doPost(e) {
 
     const nomeAba = ABAS_PERMITIDAS.indexOf(payload.aba) === -1 ? SHEET_PADRAO : payload.aba;
 
+    /**
+     * Contato da Coop com cara de robô: descartado sem gravar nem avisar.
+     * Responde "success" de propósito, para o robô não insistir por outro
+     * caminho. A página já faz essa checagem; esta é para quem mandar direto.
+     */
+    if (nomeAba === 'Cosmmus Coop' && pareceRobo(incomingHeaders, incomingRow)) {
+      return jsonOutput({ result: 'success', protocolo: protocolo, ignorado: true });
+    }
+
     const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
     let sheet = spreadsheet.getSheetByName(nomeAba);
     if (!sheet) {
@@ -189,6 +198,32 @@ function doPost(e) {
   } finally {
     lock.releaseLock();
   }
+}
+
+/**
+ * Sinais de envio automático no contato da Coop: WhatsApp sem a quantidade
+ * de dígitos de um telefone, ou palavras longas que alternam maiúsculas e
+ * minúsculas no meio, como "ixexZKxrCOphjYLjlJMX" (nomes reais têm no máximo
+ * uma troca dessas, como "McDonald").
+ */
+function pareceRobo(headers, row) {
+  var valor = function (nome) {
+    var i = headers.indexOf(nome);
+    return i === -1 ? '' : String(row[i] || '');
+  };
+
+  var digitos = valor('5 WhatsApp').replace(/\D/g, '');
+  if (digitos.length < 10 || digitos.length > 13) return true;
+
+  var aleatorio = function (texto) {
+    return texto.trim().split(/\s+/).some(function (palavra) {
+      var trocas = palavra.match(/[a-zà-ÿ][A-ZÀ-Þ]/g) || [];
+      return palavra.length >= 8 && trocas.length >= 2;
+    });
+  };
+  return ['1 Nome', '2 Cooperativa', '4 Cidade e UF', '8 Mensagem'].some(function (nome) {
+    return aleatorio(valor(nome));
+  });
 }
 
 /** Executa um aviso sem deixar que a falha dele derrube o resto. */
