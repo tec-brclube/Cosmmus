@@ -240,9 +240,9 @@ const awards = [
   {
     photo: fotoCertificadoUfg,
     alt: 'Marcos Antonio recebe o Certificado de Reconhecimento do Conselho Universitário da UFG',
-    tag: 'Conselho Universitário da UFG',
+    tag: 'Conselho Universitário da UFG · 2017',
     title: 'Certificado de Reconhecimento',
-    text: 'Pelo reconhecimento concedido pelo Governo de Goiás ao trabalho de combate à extrema pobreza do projeto Crisálida.',
+    text: 'Concedido pelo CONSUNI da UFG ao trabalho de combate à extrema pobreza do projeto Crisálida, premiado pelo Governo de Goiás.',
   },
 ];
 
@@ -697,12 +697,15 @@ const CoopPage: React.FC = () => {
             <Reveal>
               <div className="relative overflow-hidden rounded-3xl border border-[#19c46e]/25 bg-gradient-to-br from-[#0a1714]/70 via-[#07051a]/90 to-[#140a2c]/90 p-4 sm:p-6 lg:p-7 grid lg:grid-cols-[1.05fr_1fr] gap-8 lg:gap-12 items-center mb-6">
                 <div className="absolute -right-24 -bottom-24 w-[420px] h-[420px] rounded-full blur-[120px] opacity-20 pointer-events-none" style={{ background: VIOLET }} aria-hidden="true" />
-                <img
-                  src={fotoPapa}
-                  alt="Papa Francisco segura o livro O Dia em que a Terra Voltou a Sorrir! em Assis"
-                  className="relative w-full aspect-square object-cover rounded-2xl"
-                  loading="lazy"
-                />
+                <figure className="relative">
+                  <img
+                    src={fotoPapa}
+                    alt="Papa Francisco segura o livro O Dia em que a Terra Voltou a Sorrir! em Assis"
+                    className="w-full aspect-square object-cover rounded-2xl"
+                    loading="lazy"
+                  />
+                  <figcaption className="mt-3 px-1 text-xs text-white/45">Foto: Vatican Media</figcaption>
+                </figure>
                 <div className="relative px-2 sm:px-4 lg:px-0 lg:pr-6 pb-4 lg:pb-0">
                   <span className="inline-block px-4 py-1.5 rounded-full border border-white/15 text-[11px] font-bold tracking-[0.2em] uppercase text-[#c58cff] mb-6">
                     Assis, Itália · Setembro de 2022
