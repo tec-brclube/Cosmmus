@@ -37,6 +37,9 @@ import fotoReuniao2 from '../../IMAGENS/img/reuniao-2.jpg';
 import fotoReuniao3 from '../../IMAGENS/img/reuniao-3.jpg';
 import fotoReuniao4 from '../../IMAGENS/img/reuniao-4.jpg';
 import fotoReuniao5 from '../../IMAGENS/img/reuniao-5.jpg';
+import fotoPapa from '../../IMAGENS/img/papa-francisco-livro.webp';
+import fotoMencaoHonrosa from '../../IMAGENS/img/premio-probec-2017.jpg';
+import fotoCertificadoUfg from '../../IMAGENS/img/premio-ufg.jpg';
 import CoopContactForm, { CoopInterest } from './CoopContactForm';
 import OficinaVideo from './OficinaVideo';
 import CoopOrbit from './CoopOrbit';
@@ -91,7 +94,6 @@ const practicePhotos = [
   { src: fotoCooperxixaEquipe, alt: 'Equipe da Cooperxixá com parceiros', width: 1400, height: 1050 },
   { src: fotoReuniao3, alt: 'Reunião com a equipe', width: 1400, height: 1050 },
   { src: fotoReuniao1, alt: 'Reunião em mesa com dirigentes', width: 900, height: 1200 },
-  { src: fotoMaos, alt: 'Cooperados de mãos unidas numa dinâmica', width: 1400, height: 934 },
   { src: fotoReuniao2, alt: 'Reunião de trabalho', width: 900, height: 1200 },
   { src: fotoUegTurma, alt: 'Turma de formação na Universidade Estadual de Goiás', width: 1400, height: 1210 },
   { src: fotoReuniao4, alt: 'Encontro com dirigentes', width: 900, height: 1200 },
@@ -216,13 +218,39 @@ const milestones = [
   },
   {
     year: '2022',
+    title: 'Participante do The Economy of Francesco',
+    text: 'Encontro global convocado pelo Papa Francisco em Assis, na Itália, com jovens economistas e empreendedores de todo o mundo.',
+  },
+  {
+    year: '2022',
     title: 'Professor do curso Cooperar para Empreender',
     text: 'Formação de catadores de materiais recicláveis em Goiânia, em convênio entre o Governo de Goiás, a UFG e a Fundação Rádio e Televisão Educativa e Cultural.',
   },
 ];
 
+/** Reconhecimentos com foto, abaixo do destaque do Papa Francisco. */
+const awards = [
+  {
+    photo: fotoMencaoHonrosa,
+    alt: 'Marcos Antonio recebe o certificado de Menção Honrosa da UFG',
+    tag: 'UFG · 2016',
+    title: 'Menção Honrosa no II Prêmio Extensão e Cultura',
+    text: 'Pelo trabalho “A Educação para Além do Mercado: do Individualismo no Lixão à Solidariedade na Cooperativa”.',
+  },
+  {
+    photo: fotoCertificadoUfg,
+    alt: 'Marcos Antonio recebe o Certificado de Reconhecimento do Conselho Universitário da UFG',
+    tag: 'Conselho Universitário da UFG',
+    title: 'Certificado de Reconhecimento',
+    text: 'Pelo reconhecimento concedido pelo Governo de Goiás ao trabalho de combate à extrema pobreza do projeto Crisálida.',
+  },
+];
+
 /** Os anos da trajetória seguem o degradê, do verde ao roxo. */
-const MILESTONE_COLORS = [GREEN, '#14b487', TEAL, BLUE, '#6a5cf5', VIOLET];
+/** Cor de cada princípio, do verde ao roxo. */
+const PRINCIPLE_COLORS = [GREEN, '#14b487', TEAL, BLUE, '#5b6cf5', '#7d55fa', VIOLET];
+
+const MILESTONE_COLORS = [GREEN, '#14b487', TEAL, BLUE, '#6a5cf5', '#8550fa', VIOLET];
 
 /* ── Peças visuais ─────────────────────────────────────────────────────────── */
 
@@ -663,6 +691,64 @@ const CoopPage: React.FC = () => {
             </Reveal>
           </div>
 
+          {/* Reconhecimentos */}
+          <div className="mb-24">
+            <Eyebrow>Reconhecimentos</Eyebrow>
+            <Reveal>
+              <div className="relative overflow-hidden rounded-3xl border border-[#19c46e]/25 bg-gradient-to-br from-[#0a1714]/70 via-[#07051a]/90 to-[#140a2c]/90 p-4 sm:p-6 lg:p-7 grid lg:grid-cols-[1.05fr_1fr] gap-8 lg:gap-12 items-center mb-6">
+                <div className="absolute -right-24 -bottom-24 w-[420px] h-[420px] rounded-full blur-[120px] opacity-20 pointer-events-none" style={{ background: VIOLET }} aria-hidden="true" />
+                <img
+                  src={fotoPapa}
+                  alt="Papa Francisco segura o livro O Dia em que a Terra Voltou a Sorrir! em Assis"
+                  className="relative w-full aspect-square object-cover rounded-2xl"
+                  loading="lazy"
+                />
+                <div className="relative px-2 sm:px-4 lg:px-0 lg:pr-6 pb-4 lg:pb-0">
+                  <span className="inline-block px-4 py-1.5 rounded-full border border-white/15 text-[11px] font-bold tracking-[0.2em] uppercase text-[#c58cff] mb-6">
+                    Assis, Itália · Setembro de 2022
+                  </span>
+                  <h3 className="text-3xl md:text-[2.6rem] font-extrabold text-white tracking-tight leading-[1.08] mb-6">
+                    Do coração do Brasil às mãos do <GradientText>Papa Francisco.</GradientText>
+                  </h3>
+                  <p className="text-lg text-white/75 leading-relaxed mb-5">
+                    Marcos Antonio participou do The Economy of Francesco, encontro global convocado pelo Papa Francisco para
+                    jovens economistas e empreendedores que querem construir uma economia mais justa. No encontro, o livro{' '}
+                    <em>O Dia em que a Terra Voltou a Sorrir!</em> chegou às mãos do Papa.
+                  </p>
+                  <p className="text-[15px] text-white/50 leading-relaxed">
+                    Economia a serviço das pessoas e da comunidade: a mesma convicção que orienta o trabalho da Cosmmus Coop.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              {awards.map((award, index) => (
+                <Reveal
+                  key={award.title}
+                  delay={index * 0.1}
+                  className={`group rounded-3xl border bg-white/[0.02] p-4 hover:border-white/25 transition-colors ${index === 0 ? 'border-[#19c46e]/25' : 'border-white/10'}`}
+                >
+                  <div className="aspect-[3/2] overflow-hidden rounded-2xl mb-5">
+                    <img
+                      src={award.photo}
+                      alt={award.alt}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="px-2 pb-2">
+                    <p className="text-xs font-bold tracking-[0.2em] uppercase mb-2" style={{ color: index === 0 ? GREEN : TEAL }}>
+                      {award.tag}
+                    </p>
+                    <h4 className="text-lg md:text-xl font-bold text-white tracking-tight mb-2">{award.title}</h4>
+                    <p className="text-[15px] text-white/65 leading-relaxed">{award.text}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+
           {/* Trajetória e o livro */}
           <div className="grid lg:grid-cols-[1.5fr_1fr] gap-12 lg:gap-16 items-start">
             <div>
@@ -716,31 +802,40 @@ const CoopPage: React.FC = () => {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Reveal className="max-w-5xl mx-auto text-center mb-10">
             <Eyebrow>O que acreditamos</Eyebrow>
-            <p className="text-3xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-[1.08]">
-              <span className="text-white/35" aria-hidden="true">“</span>Cooperar é acreditar que o sucesso de um só faz
-              sentido quando <GradientText>fortalece a todos.</GradientText>
-              <span className="text-white/35" aria-hidden="true">”</span>
+            <p className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-[1.08]">
+              Cooperar é acreditar que o sucesso de um só faz sentido quando <GradientText>fortalece a todos.</GradientText>
             </p>
           </Reveal>
 
           <Reveal className="max-w-2xl mx-auto text-center mb-14">
             <p className="text-lg text-white/70 leading-relaxed">
               O cooperativismo é mais que um modelo de negócios. É uma forma de gerar riqueza compartilhada, reduzir
-              desigualdades e construir comunidades mais justas. Nosso trabalho parte dos sete princípios:
+              desigualdades e construir comunidades mais justas. Nosso trabalho parte dos sete princípios.
             </p>
           </Reveal>
 
-          {/* Quatro em cima e três centralizados embaixo */}
-          <ol className="flex flex-wrap justify-center gap-4">
+          <Reveal className="mb-12">
+            <img
+              src={fotoMaos}
+              alt="Cooperados com os punhos unidos numa roda"
+              className="w-full aspect-[16/9] md:aspect-[24/7] object-cover rounded-3xl"
+              loading="lazy"
+            />
+          </Reveal>
+
+          {/* Os sete princípios numa linha só, com a cor do degradê em cada número */}
+          <ol className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 md:gap-4">
             {principles.map((principle, index) => (
               <Reveal
                 as="li"
                 key={principle}
                 delay={index * 0.05}
-                className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(25%-0.75rem)] rounded-2xl border border-white/[0.07] bg-white/[0.02] p-6 flex flex-col items-center justify-between text-center min-h-[150px] hover:border-white/20 transition-colors"
+                className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 md:p-5 min-h-[120px] hover:border-white/20 transition-colors"
               >
-                <GradientText className="text-4xl font-extrabold tabular-nums leading-none">{index + 1}º</GradientText>
-                <span className="text-white/90 font-semibold leading-snug mt-6">{principle}</span>
+                <span className="block text-sm font-extrabold tabular-nums mb-3" style={{ color: PRINCIPLE_COLORS[index] }}>
+                  {index + 1}º
+                </span>
+                <span className="block text-white font-semibold leading-snug text-[15px]">{principle}</span>
               </Reveal>
             ))}
           </ol>
