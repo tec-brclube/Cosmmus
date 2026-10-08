@@ -57,7 +57,7 @@ endereço com o seu arquivo.
 
 - A imagem precisa ser **JPG ou PNG** (SVG é ignorado), 1200 × 630, de preferência
   abaixo de 300 KB.
-- `/cosmmus-coop` usa `og-coop.jpg`; todas as outras páginas usam `og-image.jpg`.
+- `/coop` usa `og-coop.jpg`; todas as outras páginas usam `og-image.jpg`.
 - As páginas individuais da equipe (`/equipe/<nome>`) ainda compartilham a
   pré-visualização da home, porque o título delas vem de dados com fotos que o
   build não lê.

@@ -49,7 +49,7 @@ import PracticeStrip from './PracticeStrip';
  * ─────────────────────────────────────────────────────────────────────────────
  * COSMMUS COOP
  *
- * Página própria da frente de cooperativas (/cosmmus-coop). Usa a identidade
+ * Página própria da frente de cooperativas (/coop). Usa a identidade
  * da Cosmmus com uma paleta própria, do verde ao roxo: o verde é a cor
  * histórica do cooperativismo, o roxo é a da Cosmmus.
  * ─────────────────────────────────────────────────────────────────────────────

@@ -18,7 +18,7 @@ import {
  * O site é uma SPA: o servidor entrega sempre o mesmo index.html e o
  * JavaScript troca título e imagem depois. Só que WhatsApp, Facebook, LinkedIn
  * e X não rodam JavaScript: leem apenas o HTML que chega. Sem este passo,
- * qualquer link do site (inclusive /cosmmus-coop) apareceria com o título e a
+ * qualquer link do site (inclusive /coop) apareceria com o título e a
  * imagem da página inicial.
  *
  * Depois do build, este plugin copia dist/index.html para

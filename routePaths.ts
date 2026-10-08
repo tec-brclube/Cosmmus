@@ -17,5 +17,5 @@ export const ROUTES: Partial<Record<ViewState, string>> = {
   contact: '/contato',
   aplicacao: '/aplicacaocosmmus',
   diagnostico: '/diagnostico',
-  coop: '/cosmmus-coop',
+  coop: '/coop',
 };

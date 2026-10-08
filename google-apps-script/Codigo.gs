@@ -15,7 +15,7 @@
  * própria aba (campo "aba" do envio), criada automaticamente na primeira
  * resposta: 'Respostas' para a caracterização organizacional e
  * 'Diagnostico Cosmmus' para o formulário de diagnóstico e 'Cosmmus Coop' para
- * o contato da página /cosmmus-coop.
+ * o contato da página /coop.
  */
 const SHEET_PADRAO = 'Respostas';
 

@@ -1,5 +1,12 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "redirects": [
+    {
+      "source": "/cosmmus-coop",
+      "destination": "/coop",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/sobre",
@@ -42,8 +49,8 @@
       "destination": "/diagnostico/index.html"
     },
     {
-      "source": "/cosmmus-coop",
-      "destination": "/cosmmus-coop/index.html"
+      "source": "/coop",
+      "destination": "/coop/index.html"
     }
   ],
   "headers": [
