@@ -1,6 +1,9 @@
 import type React from 'react';
 import { ViewState } from './types';
 import { getMemberBySlug } from './components/equipe/teamData';
+import { ROUTES } from './routePaths';
+
+export { ROUTES };
 
 /**
  * ─────────────────────────────────────────────────────────────────────────────
@@ -15,18 +18,6 @@ import { getMemberBySlug } from './components/equipe/teamData';
  * e que o mesmo caminho precisa constar em vercel.json e em public/sitemap.xml.
  * ─────────────────────────────────────────────────────────────────────────────
  */
-export const ROUTES: Partial<Record<ViewState, string>> = {
-  about: '/sobre',
-  equipe: '/equipe',
-  services: '/areas-de-atuacao',
-  methodology: '/metodologia',
-  cases: '/cases',
-  blog: '/conteudos',
-  contact: '/contato',
-  aplicacao: '/aplicacaocosmmus',
-  diagnostico: '/diagnostico',
-  coop: '/cosmmus-coop',
-};
 
 /** Prefixo das páginas individuais da equipe: /equipe/<slug> */
 export const MEMBER_PREFIX = '/equipe/';

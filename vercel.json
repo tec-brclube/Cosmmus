@@ -1,26 +1,69 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    { "source": "/sobre", "destination": "/index.html" },
-    { "source": "/equipe", "destination": "/index.html" },
-    { "source": "/equipe/:slug", "destination": "/index.html" },
-    { "source": "/areas-de-atuacao", "destination": "/index.html" },
-    { "source": "/metodologia", "destination": "/index.html" },
-    { "source": "/cases", "destination": "/index.html" },
-    { "source": "/conteudos", "destination": "/index.html" },
-    { "source": "/contato", "destination": "/index.html" },
-    { "source": "/aplicacaocosmmus", "destination": "/index.html" },
-    { "source": "/diagnostico", "destination": "/index.html" },
-    { "source": "/cosmmus-coop", "destination": "/index.html" }
+    {
+      "source": "/sobre",
+      "destination": "/sobre/index.html"
+    },
+    {
+      "source": "/equipe",
+      "destination": "/equipe/index.html"
+    },
+    {
+      "source": "/equipe/:slug",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/areas-de-atuacao",
+      "destination": "/areas-de-atuacao/index.html"
+    },
+    {
+      "source": "/metodologia",
+      "destination": "/metodologia/index.html"
+    },
+    {
+      "source": "/cases",
+      "destination": "/cases/index.html"
+    },
+    {
+      "source": "/conteudos",
+      "destination": "/conteudos/index.html"
+    },
+    {
+      "source": "/contato",
+      "destination": "/contato/index.html"
+    },
+    {
+      "source": "/aplicacaocosmmus",
+      "destination": "/aplicacaocosmmus/index.html"
+    },
+    {
+      "source": "/diagnostico",
+      "destination": "/diagnostico/index.html"
+    },
+    {
+      "source": "/cosmmus-coop",
+      "destination": "/cosmmus-coop/index.html"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
-      "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }]
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
+      ]
     },
     {
       "source": "/assets/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ]
 }

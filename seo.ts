@@ -1,5 +1,17 @@
 import { ViewState } from './types';
 import { getMemberBySlug } from './components/equipe/teamData';
+import {
+  COOP_IMAGE,
+  COOP_IMAGE_ALT,
+  DEFAULT_IMAGE,
+  DEFAULT_IMAGE_ALT,
+  SITE_NAME,
+  SITE_URL,
+  VIEW_SEO,
+  SeoEntry,
+} from './seoData';
+
+export { SITE_URL, SITE_NAME };
 
 /**
  * ─────────────────────────────────────────────────────────────────────────────
@@ -10,86 +22,12 @@ import { getMemberBySlug } from './components/equipe/teamData';
  * reescritas no navegador a cada troca de view (o Googlebot executa JavaScript
  * antes de indexar).
  *
- * Os textos abaixo são recortes do conteúdo já publicado em cada página —
- * nenhuma informação nova é introduzida aqui.
+ * Os textos de cada página estão em seoData.ts, que o build também lê para
+ * gerar um HTML por endereço (é o que WhatsApp, Facebook e LinkedIn enxergam,
+ * já que não rodam JavaScript). Esta troca no navegador mantém título e
+ * descrição certos para quem navega pelo site e para o Googlebot.
  * ─────────────────────────────────────────────────────────────────────────────
  */
-
-/** Endereço público do site — usado em canonical, Open Graph e sitemap. */
-export const SITE_URL = 'https://www.cosmmus.com';
-
-export const SITE_NAME = 'COSMMUS Business';
-
-export const DEFAULT_TITLE = 'COSMMUS Business | Consultoria Empresarial e Plano de Negócios';
-
-export const DEFAULT_DESCRIPTION =
-  'Desenvolvendo negócios e potencializando pessoas. Consultoria empresarial em todo o Brasil: plano de negócios, finanças, sustentabilidade e treinamentos.';
-
-/** Imagem de pré-visualização usada ao compartilhar links. */
-const SOCIAL_IMAGE = `${SITE_URL}/og-image.svg`;
-
-interface SeoEntry {
-  title: string;
-  description: string;
-}
-
-/** Título e descrição de cada view com endereço próprio. */
-const VIEW_SEO: Partial<Record<ViewState, SeoEntry>> = {
-  home: {
-    title: DEFAULT_TITLE,
-    description: DEFAULT_DESCRIPTION,
-  },
-  about: {
-    title: 'Sobre Nós | COSMMUS Business',
-    description:
-      'Não somos consultores, somos arquitetos de legado. Conheça o manifesto da COSMMUS Business e a forma como unimos a precisão dos números à força das relações humanas.',
-  },
-  equipe: {
-    title: 'Equipe | COSMMUS Business',
-    description:
-      'Economistas, contadores, advogados, psicólogos e designers que assinam os projetos da COSMMUS Business. Conheça a trajetória de cada profissional.',
-  },
-  services: {
-    title: 'Áreas de Atuação | COSMMUS Business',
-    description:
-      'Consultoria, finanças, sustentabilidade, cooperativismo e treinamentos: as soluções da COSMMUS Business para quem não aceita o médio.',
-  },
-  methodology: {
-    title: 'Metodologia | COSMMUS Business',
-    description:
-      'Diagnóstico de precisão, arquitetura do plano, ativação tática, monitoramento por indicadores e evolução contínua: as cinco etapas do método COSMMUS.',
-  },
-  cases: {
-    title: 'Cases e Projetos | COSMMUS Business',
-    description:
-      'Cases e projetos da COSMMUS Business: o desafio de cada cliente, a estratégia aplicada e os resultados alcançados.',
-  },
-  blog: {
-    title: 'Conteúdos e Insights | COSMMUS Business',
-    description:
-      'Conteúdos e insights da COSMMUS Business sobre gestão estratégica, finanças, sustentabilidade e o futuro dos negócios.',
-  },
-  contact: {
-    title: 'Contato | COSMMUS Business',
-    description:
-      'Fale com a COSMMUS Business e agende uma reunião estratégica para desenhar o próximo ciclo da sua empresa.',
-  },
-  coop: {
-    title: 'Cosmmus Coop | Consultoria para Cooperativas | COSMMUS Business',
-    description:
-      'Apoiamos cooperativas da constituição à expansão: governança, planejamento, gestão econômica e educação cooperativista, com gestão que respeita a autogestão.',
-  },
-  diagnostico: {
-    title: 'Diagnóstico Cosmmus | COSMMUS Business',
-    description:
-      'Conte em poucos minutos o momento da sua empresa, organização ou ideia: a Cosmmus Business avalia o escopo e monta uma proposta compatível.',
-  },
-  aplicacao: {
-    title: 'NR-01 | Caracterização Organizacional | COSMMUS Business',
-    description:
-      'Formulário de caracterização organizacional da COSMMUS Business: o primeiro passo para o diagnóstico da sua empresa.',
-  },
-};
 
 /** Corta a descrição no limite que os buscadores costumam exibir. */
 const trim = (text: string, max = 158): string =>
@@ -181,11 +119,15 @@ export const applySeo = (view: ViewState, memberSlug: string | null, path: strin
   upsertMeta('property', 'og:description', entry.description);
   upsertMeta('property', 'og:url', url);
   upsertMeta('property', 'og:type', view === 'equipe-detalhe' ? 'profile' : 'website');
-  upsertMeta('property', 'og:image', SOCIAL_IMAGE);
+  const isCoop = entry.image === COOP_IMAGE;
+  const image = entry.image || DEFAULT_IMAGE;
+  upsertMeta('property', 'og:image', image);
+  upsertMeta('property', 'og:image:alt', isCoop ? COOP_IMAGE_ALT : DEFAULT_IMAGE_ALT);
 
   upsertMeta('name', 'twitter:title', entry.title);
   upsertMeta('name', 'twitter:description', entry.description);
-  upsertMeta('name', 'twitter:image', SOCIAL_IMAGE);
+  upsertMeta('name', 'twitter:image', image);
+  upsertMeta('name', 'twitter:image:alt', isCoop ? COOP_IMAGE_ALT : DEFAULT_IMAGE_ALT);
 
   upsertMeta('name', 'robots', 'index, follow, max-image-preview:large, max-snippet:-1');
 
